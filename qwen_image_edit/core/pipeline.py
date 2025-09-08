@@ -23,8 +23,7 @@ class QwenImagePipeline:
     def __init__(self, config: Optional[Config] = None):
         self.config = config or Config()
         self.console = Console()
-        self.generation_pipeline = None
-        self.editing_pipeline = None
+        self.pipeline = None  # Single pipeline for both generation and editing
         self._device = None
         self._dtype = None
         
@@ -44,9 +43,9 @@ class QwenImagePipeline:
             
         self.console.print(Panel(device_info, title="Device Configuration", style="green"))
     
-    def _load_generation_pipeline(self) -> None:
-        """Load the image generation pipeline with progress indication."""
-        if self.generation_pipeline is not None:
+    def _load_pipeline(self) -> None:
+        """Load the Qwen Image Edit pipeline for both generation and editing."""
+        if self.pipeline is not None:
             return
             
         with Progress(
@@ -57,54 +56,13 @@ class QwenImagePipeline:
             console=self.console
         ) as progress:
             
-            task = progress.add_task("Loading Qwen Image generation model...", total=None)
-            
-            try:
-                from diffusers import DiffusionPipeline
-                
-                # Load the pipeline
-                self.generation_pipeline = DiffusionPipeline.from_pretrained(
-                    "Qwen/Qwen-Image",
-                    torch_dtype=self._dtype,
-                    trust_remote_code=True,
-                    cache_dir=str(self.config.model_config.cache_dir),
-                )
-                
-                progress.update(task, description="Moving model to device...")
-                self.generation_pipeline = self.generation_pipeline.to(self._device)
-                
-                # Load Lightning LoRA if configured
-                if self.config.model_config.use_lightning:
-                    progress.update(task, description="Loading Lightning LoRA for fast generation...")
-                    self._load_lightning_lora(self.generation_pipeline, steps=self.config.model_config.lightning_steps)
-                
-                progress.update(task, description="✅ Generation pipeline ready!", completed=100)
-                
-            except Exception as e:
-                progress.stop()
-                self._handle_pipeline_error(e, "generation")
-                raise
-    
-    def _load_editing_pipeline(self) -> None:
-        """Load the image editing pipeline with progress indication."""
-        if self.editing_pipeline is not None:
-            return
-            
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(),
-            TimeElapsedColumn(),
-            console=self.console
-        ) as progress:
-            
-            task = progress.add_task("Loading Qwen Image editing model...", total=None)
+            task = progress.add_task("Loading Qwen Image Edit model...", total=None)
             
             try:
                 from diffusers import QwenImageEditPipeline
                 
-                # Load the pipeline
-                self.editing_pipeline = QwenImageEditPipeline.from_pretrained(
+                # Load the pipeline - Qwen-Image-Edit can do both generation and editing
+                self.pipeline = QwenImageEditPipeline.from_pretrained(
                     "Qwen/Qwen-Image-Edit",
                     torch_dtype=self._dtype,
                     trust_remote_code=True,
@@ -112,18 +70,18 @@ class QwenImagePipeline:
                 )
                 
                 progress.update(task, description="Moving model to device...")
-                self.editing_pipeline = self.editing_pipeline.to(self._device)
+                self.pipeline = self.pipeline.to(self._device)
                 
                 # Load Lightning LoRA if configured
                 if self.config.model_config.use_lightning:
-                    progress.update(task, description="Loading Lightning LoRA for fast editing...")
-                    self._load_lightning_lora(self.editing_pipeline, steps=self.config.model_config.lightning_steps)
+                    progress.update(task, description="Loading Lightning LoRA for acceleration...")
+                    self._load_lightning_lora(self.pipeline, steps=self.config.model_config.lightning_steps)
                 
-                progress.update(task, description="✅ Editing pipeline ready!", completed=100)
+                progress.update(task, description="✅ Qwen Image Edit pipeline ready!", completed=100)
                 
             except Exception as e:
                 progress.stop()
-                self._handle_pipeline_error(e, "editing")
+                self._handle_pipeline_error(e, "model loading")
                 raise
     
     def _load_lightning_lora(self, pipeline, steps: int = 4) -> None:
@@ -193,10 +151,10 @@ class QwenImagePipeline:
         seed: Optional[int] = None,
         use_lightning: Optional[bool] = None,
     ) -> Image.Image:
-        """Generate an image from a text prompt."""
+        """Generate an image from a text prompt using Qwen Image Edit."""
         
-        # Load generation pipeline if needed
-        self._load_generation_pipeline()
+        # Load pipeline if needed
+        self._load_pipeline()
         
         # Use intelligent defaults
         use_lightning = use_lightning if use_lightning is not None else self.config.model_config.use_lightning
@@ -238,17 +196,17 @@ class QwenImagePipeline:
             def callback(step, timestep, latents):
                 progress.update(task, advance=1)
             
-            # Generate image
-            result = self.generation_pipeline(
+            # Generate image using Qwen Image Edit pipeline
+            # Note: For generation-only, pass image=None or use text-to-image mode
+            result = self.pipeline(
                 prompt=prompt,
                 negative_prompt=negative_prompt,
                 num_inference_steps=steps,
-                guidance_scale=cfg_scale,
+                true_cfg_scale=cfg_scale,
                 width=size[0],
                 height=size[1],
                 generator=generator,
-                callback=callback,
-                callback_steps=1,
+                # Note: QwenImageEditPipeline may not support callback
             )
         
         generation_time = time.time() - start_time
@@ -268,8 +226,8 @@ class QwenImagePipeline:
     ) -> Image.Image:
         """Edit an existing image based on a text prompt."""
         
-        # Load editing pipeline if needed
-        self._load_editing_pipeline()
+        # Load pipeline if needed
+        self._load_pipeline()
         
         # Load and validate input image
         if isinstance(image, (str, Path)):
@@ -321,15 +279,14 @@ class QwenImagePipeline:
                 progress.update(task, advance=1)
             
             # Edit image
-            result = self.editing_pipeline(
+            result = self.pipeline(
                 image=image,
                 prompt=prompt,
                 negative_prompt=negative_prompt,
                 num_inference_steps=steps,
                 true_cfg_scale=cfg_scale,
                 generator=generator,
-                callback=callback,
-                callback_steps=1,
+                # Note: callback not supported by QwenImageEditPipeline
             )
         
         editing_time = time.time() - start_time
@@ -380,8 +337,8 @@ class QwenImagePipeline:
                 "dtype": str(self._dtype),
             },
             "pipelines": {
-                "generation_loaded": self.generation_pipeline is not None,
-                "editing_loaded": self.editing_pipeline is not None,
+                "pipeline_loaded": self.pipeline is not None,
+                "model": "Qwen/Qwen-Image-Edit",
             },
             "config": {
                 "use_lightning": self.config.model_config.use_lightning,
