@@ -46,9 +46,9 @@ qwen-image status
 ### Option 1: One-Command Setup (Recommended)
 
 ```bash
-git clone https://github.com/yourusername/qwen-image-edit-macos.git
+git clone https://github.com/zsxkib/qwen-image-edit-macos.git
 cd qwen-image-edit-macos
-python setup.py
+python install.py
 ```
 
 That's it! The setup script will:
@@ -62,7 +62,7 @@ That's it! The setup script will:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/qwen-image-edit-macos.git
+git clone https://github.com/zsxkib/qwen-image-edit-macos.git
 cd qwen-image-edit-macos
 
 # Create conda environment (recommended)

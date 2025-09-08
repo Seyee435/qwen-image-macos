@@ -54,10 +54,10 @@ dev = [
 qwen-image = "qwen_image_edit.cli.main:main"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/qwen-image-edit-macos"
-Repository = "https://github.com/yourusername/qwen-image-edit-macos"
-Documentation = "https://github.com/yourusername/qwen-image-edit-macos#readme"
-Issues = "https://github.com/yourusername/qwen-image-edit-macos/issues"
+Homepage = "https://github.com/zsxkib/qwen-image-edit-macos"
+Repository = "https://github.com/zsxkib/qwen-image-edit-macos"
+Documentation = "https://github.com/zsxkib/qwen-image-edit-macos#readme"
+Issues = "https://github.com/zsxkib/qwen-image-edit-macos/issues"
 
 [tool.setuptools.packages.find]
 include = ["qwen_image_edit*"]
