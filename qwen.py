@@ -299,9 +299,9 @@ def test():
         start_time = time.time()
         result = pipeline(
             prompt="a cute robot waving hello",
-            num_inference_steps=4,
-            width=512,
-            height=512,
+            num_inference_steps=10,
+            width=768,
+            height=768,
         )
         gen_time = time.time() - start_time
         
@@ -314,6 +314,7 @@ def test():
         
         print(f"🎉 Demo image generated in {gen_time:.1f}s!")
         print(f"📁 Saved: {test_path}")
+        print("📝 Note: This is a quick demo (10 steps). Use --steps 20 for higher quality!")
         
         # Auto-open on Mac
         if platform.system() == "Darwin":
