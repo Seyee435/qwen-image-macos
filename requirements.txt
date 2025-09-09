@@ -1,0 +1,6 @@
+torch>=2.0.0
+torchvision
+diffusers>=0.30.0
+transformers>=4.40.0
+pillow>=10.0.0
+click>=8.0.0
