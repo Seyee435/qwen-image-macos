@@ -26,63 +26,73 @@ def setup_device():
 
 
 def load_generation_pipeline():
-    """Load the Qwen Image pipeline for text-to-image generation."""
-    print("Loading Qwen Image generation model...")
+    """Load generation pipeline with Lightning LoRA."""
+    print("📥 Loading Qwen Image model (first run downloads ~10GB)...")
     start = time.time()
     
-    from diffusers import QwenImagePipeline
-    device, dtype = setup_device()
-    
-    pipeline = QwenImagePipeline.from_pretrained(
-        "Qwen/Qwen-Image",
-        torch_dtype=dtype,
-    ).to(device)
-    
-    # Try to load Lightning LoRA for speed
     try:
-        pipeline.load_lora_weights(
-            "lightx2v/Qwen-Image-Lightning", 
-            weight_name="Qwen-Image-Lightning-4steps-V1.0-bf16.safetensors"
-        )
-        pipeline.fuse_lora()
-        print("⚡ Lightning LoRA loaded - 4x faster!")
+        from diffusers import QwenImagePipeline
+        device, dtype = setup_device()
+        
+        pipeline = QwenImagePipeline.from_pretrained(
+            "Qwen/Qwen-Image",
+            torch_dtype=dtype,
+        ).to(device)
+        
+        # Load Lightning LoRA for 4x speed
+        try:
+            pipeline.load_lora_weights(
+                "lightx2v/Qwen-Image-Lightning", 
+                weight_name="Qwen-Image-Lightning-4steps-V1.0-bf16.safetensors"
+            )
+            pipeline.fuse_lora()
+            print("⚡ Lightning LoRA loaded - 4x faster!")
+        except:
+            print("⚠️ Lightning LoRA not available, using standard model")
+        
+        load_time = time.time() - start
+        print(f"✅ Ready in {load_time:.1f}s")
+        return pipeline, device
+        
     except Exception as e:
-        print(f"⚠️ Lightning LoRA failed: {str(e)[:100]}...")
-        print("Continuing with standard model...")
-    
-    load_time = time.time() - start
-    print(f"✅ Generation model ready in {load_time:.1f}s")
-    return pipeline, device
+        print(f"❌ Failed to load model: {e}")
+        print("💡 Try: pip install --upgrade diffusers transformers")
+        sys.exit(1)
 
 
 def load_editing_pipeline():
-    """Load the Qwen Image Edit pipeline for image editing."""
-    print("Loading Qwen Image Edit model...")
+    """Load editing pipeline with Lightning LoRA."""
+    print("📥 Loading Qwen Image Edit model...")
     start = time.time()
     
-    from diffusers import QwenImageEditPipeline
-    device, dtype = setup_device()
-    
-    pipeline = QwenImageEditPipeline.from_pretrained(
-        "Qwen/Qwen-Image-Edit",
-        torch_dtype=dtype,
-    ).to(device)
-    
-    # Try to load Lightning LoRA for speed
     try:
-        pipeline.load_lora_weights(
-            "lightx2v/Qwen-Image-Lightning", 
-            weight_name="Qwen-Image-Lightning-4steps-V1.0-bf16.safetensors"
-        )
-        pipeline.fuse_lora()
-        print("⚡ Lightning LoRA loaded - 4x faster!")
+        from diffusers import QwenImageEditPipeline
+        device, dtype = setup_device()
+        
+        pipeline = QwenImageEditPipeline.from_pretrained(
+            "Qwen/Qwen-Image-Edit",
+            torch_dtype=dtype,
+        ).to(device)
+        
+        # Load Lightning LoRA for 4x speed  
+        try:
+            pipeline.load_lora_weights(
+                "lightx2v/Qwen-Image-Lightning", 
+                weight_name="Qwen-Image-Lightning-4steps-V1.0-bf16.safetensors"
+            )
+            pipeline.fuse_lora()
+            print("⚡ Lightning LoRA loaded - 4x faster!")
+        except:
+            print("⚠️ Lightning LoRA not available, using standard model")
+        
+        load_time = time.time() - start
+        print(f"✅ Ready in {load_time:.1f}s")
+        return pipeline, device
+        
     except Exception as e:
-        print(f"⚠️ Lightning LoRA failed: {str(e)[:100]}...")
-        print("Continuing with standard model...")
-    
-    load_time = time.time() - start
-    print(f"✅ Edit model ready in {load_time:.1f}s")
-    return pipeline, device
+        print(f"❌ Failed to load editing model: {e}")
+        print("💡 Try: pip install --upgrade diffusers transformers")
+        sys.exit(1)
 
 
 def save_and_preview(image, filename=None):
@@ -266,64 +276,52 @@ def edit(image_path, prompt, output, steps, seed):
 
 @cli.command()
 def test():
-    """Quick test to verify everything works."""
-    print("🧪 Testing Qwen Image...")
+    """Quick test - generates a demo image."""
+    print("🧪 Testing Qwen Image on your Mac...")
     
-    # Test device
+    # Check device
     device, dtype = setup_device()
-    print(f"✅ Device: {device} ({dtype})")
-    
-    # Test MPS operations
     if device.type == "mps":
-        try:
-            x = torch.randn(100, 100, device=device, dtype=dtype)
-            y = torch.mm(x, x)
-            print("✅ MPS operations working")
-        except Exception as e:
-            print(f"❌ MPS failed: {e}")
-            return
+        print("✅ Apple Silicon GPU ready")
+    else:
+        print("⚠️ Using CPU (will be slower)")
     
-    # Quick generation test
+    # Quick demo generation
     try:
-        print("🎨 Testing text-to-image generation...")
+        print("🎨 Generating demo image...")
         pipeline, _ = load_generation_pipeline()
         
+        start_time = time.time()
         result = pipeline(
-            prompt="a simple red circle",
+            prompt="a cute robot waving hello",
             num_inference_steps=4,
             width=512,
             height=512,
         )
+        gen_time = time.time() - start_time
         
-        # Save test result
+        # Save and show
         test_image = result.images[0]
-        test_path = Path.home() / "qwen-images" / "test_generation.png"
-        test_path.parent.mkdir(exist_ok=True)
+        output_dir = Path.home() / "qwen-images"
+        output_dir.mkdir(exist_ok=True)
+        test_path = output_dir / "demo.png"
         test_image.save(test_path)
         
-        print(f"✅ Generation test passed: {test_path}")
+        print(f"🎉 Demo image generated in {gen_time:.1f}s!")
+        print(f"📁 Saved: {test_path}")
         
-        # Quick editing test using the generated image
-        print("✏️ Testing image editing...")
-        edit_pipeline, _ = load_editing_pipeline()
-        
-        edit_result = edit_pipeline(
-            image=test_image,
-            prompt="make it blue",
-            num_inference_steps=4,
-            true_cfg_scale=1.0,
-        )
-        
-        edit_test_path = Path.home() / "qwen-images" / "test_edit.png"
-        edit_result.images[0].save(edit_test_path)
-        
-        print(f"✅ Editing test passed: {edit_test_path}")
-        print("🎉 All tests passed! Ready to create amazing images!")
+        # Auto-open on Mac
+        if platform.system() == "Darwin":
+            import subprocess
+            subprocess.run(["open", str(test_path)], check=True)
+            print("👀 Opening demo image...")
+            
+        print("\n🚀 Ready! Try: python qwen.py generate 'your prompt here' --steps 4")
         
     except Exception as e:
         print(f"❌ Test failed: {e}")
-        import traceback
-        traceback.print_exc()
+        print("💡 Try: pip install --upgrade torch diffusers transformers")
+        sys.exit(1)
 
 
 @cli.command()
