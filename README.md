@@ -13,8 +13,8 @@ I got tired of slow cloud APIs and Docker containers that waste your expensive A
 *This is what Mac AI should have been from day one.*
 
 ```bash
-python qwen.py generate "cyberpunk cityscape at night" --steps 8
-# 70 seconds later: 🤯
+python qwen.py generate "cyberpunk cityscape at night" --steps 20
+# 🤯
 ```
 
 ## 🚀 Installation
@@ -30,39 +30,39 @@ python qwen.py test
 
 That's it. No Docker, no containers, no virtualization overhead. Pure native Apple Silicon performance. If you have an M1/M2/M3/M4 Mac, this will absolutely fly.
 
-## ⚡ How Fast?
+## ⚡ Performance
 
-I'm running this on an M3 Pro and it's genuinely stupid fast:
+Running this on M3 Max with 128GB unified memory:
 
-- **Fast mode (8 steps)**: ~70 seconds for 1024x1024 images
-- **Quality mode (10-20 steps)**: ~90s-3 minutes for best results
+- **Quick mode (10 steps)**: Stylistic results, good for sketches
+- **Quality mode (20+ steps)**: Fully formed, professional images  
 - **Your GPU**: Automatically uses Apple Silicon MPS
-- **Memory**: Works fine on 16GB, better on 32GB+
+- **Memory**: Works fine on 32GB+, excellent on 64GB+
 
 ## 🎯 Examples
 
 ```bash
-# Generate something cool (fast & good quality)
-python qwen.py generate "a neon-lit street in Tokyo at night" --steps 8
+# Quick stylistic results
+python qwen.py generate "a neon-lit street in Tokyo at night" --steps 10
+
+# High quality, fully formed images
+python qwen.py generate "detailed oil painting of a cat" --steps 20
 
 # Edit photos (drag & drop supported!)
-python qwen.py edit IMG_4829.HEIC "make it look like a movie poster" --steps 8
-
-# High quality (more steps)
-python qwen.py generate "detailed oil painting of a cat" --steps 50
+python qwen.py edit IMG_4829.HEIC "make it look like a movie poster" --steps 20
 
 # Custom sizes
-python qwen.py generate "ultrawide landscape" --size 1664x928
+python qwen.py generate "ultrawide landscape" --size 1664x928 --steps 20
 
 # Reproducible results
-python qwen.py generate "pixel art robot" --seed 42 --steps 4
+python qwen.py generate "pixel art robot" --seed 42 --steps 20
 ```
 
 ## 🧰 What You Need
 
 - MacBook with Apple Silicon (M1/M2/M3/M4)
 - Python 3.8+ (you probably have this)
-- 16GB+ RAM (32GB+ is better but not required)
+- 32GB+ RAM (64GB+ recommended for best performance)
 
 *Technically works on Intel Macs but why would you do that to yourself?*
 
@@ -90,11 +90,11 @@ python -c "import torch; print('MPS available:', torch.backends.mps.is_available
 ```
 Should say `True`. If not, your Mac is too old or something.
 
-**Out of memory?** Close Chrome (you have 47 tabs open). Or use `--steps 4`.
+**Out of memory?** Close Chrome (you have 47 tabs open). Works best with 32GB+ RAM.
 
-**First run slow?** It's downloading 20GB of models. Go make coffee. After that it's fast.
+**First run slow?** It's downloading ~20GB of models. Go make coffee. After that it's fast.
 
-**Images look bad?** Try `--steps 50` instead of `--steps 4`. Quality vs speed tradeoff.
+**Images look unfinished?** Try `--steps 20` for fully formed results. 10 steps = stylistic, 20+ = professional.
 
 ## 🖥️ Commands
 
@@ -108,8 +108,9 @@ python qwen.py generate "your idea" [options]
 python qwen.py edit image.jpg "your edit description"
 
 # Key options:
---steps 8     # Fast & good quality  
---steps 15    # High quality
+--steps 10    # Quick stylistic results  
+--steps 20    # High quality, fully formed
+--steps 30    # Maximum quality
 --size 1024x1024  # Custom size
 --seed 42     # Reproducible
 --output filename.png  # Custom output name

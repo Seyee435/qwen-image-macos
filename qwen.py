@@ -140,7 +140,7 @@ def cli():
 @cli.command()
 @click.argument('prompt')
 @click.option('-o', '--output', help='Output filename')  
-@click.option('--steps', default=50, help='Inference steps (50=quality, 4=fast)')
+@click.option('--steps', default=20, help='Inference steps (10=stylistic, 20=quality, 30=max)')
 @click.option('--seed', type=int, help='Random seed')
 @click.option('--size', default='1024x1024', help='Image size (e.g. 1024x1024)')
 def generate(prompt, output, steps, seed, size):
@@ -148,7 +148,7 @@ def generate(prompt, output, steps, seed, size):
     
     Examples:
       python qwen.py generate "a cyberpunk cityscape at night"
-      python qwen.py generate "cute corgi puppy" --steps 4 --seed 42
+      python qwen.py generate "cute corgi puppy" --steps 20 --seed 42
     """
     print(f"🎨 Generating: {prompt}")
     
@@ -170,10 +170,12 @@ def generate(prompt, output, steps, seed, size):
         print(f"🎲 Seed: {seed}")
     
     # Show settings
-    if steps <= 4:
-        print("⚡ Lightning mode (4 steps)")
+    if steps <= 10:
+        print(f"🎨 Quick mode ({steps} steps) - stylistic results")
+    elif steps <= 25:
+        print(f"🎨 Quality mode ({steps} steps) - fully formed")
     else:
-        print(f"🎨 Quality mode ({steps} steps)")
+        print(f"🎆 Maximum quality mode ({steps} steps)")
     
     print(f"📐 Size: {width}x{height}")
     
@@ -203,7 +205,7 @@ def generate(prompt, output, steps, seed, size):
 @click.argument('image_path')
 @click.argument('prompt')
 @click.option('-o', '--output', help='Output filename')
-@click.option('--steps', default=50, help='Inference steps (50=quality, 4=fast)')
+@click.option('--steps', default=20, help='Inference steps (10=stylistic, 20=quality, 30=max)')
 @click.option('--seed', type=int, help='Random seed')
 def edit(image_path, prompt, output, steps, seed):
     """Edit an existing image with AI.
@@ -212,7 +214,7 @@ def edit(image_path, prompt, output, steps, seed):
     
     Examples:
       python qwen.py edit photo.jpg "add snow to the mountains"
-      python qwen.py edit portrait.png "oil painting style" --steps 4
+      python qwen.py edit portrait.png "oil painting style" --steps 20
     """
     # Handle drag-and-drop paths
     image_path = image_path.strip('"\'')
@@ -245,11 +247,14 @@ def edit(image_path, prompt, output, steps, seed):
         print(f"🎲 Seed: {seed}")
     
     # Show settings  
-    if steps <= 4:
-        print("⚡ Lightning mode (4 steps)")
-        cfg_scale = 1.0
+    if steps <= 10:
+        print(f"🎨 Quick mode ({steps} steps) - stylistic results")
+        cfg_scale = 2.0
+    elif steps <= 25:
+        print(f"🎨 Quality mode ({steps} steps) - fully formed")
+        cfg_scale = 4.0
     else:
-        print(f"🎨 Quality mode ({steps} steps)")
+        print(f"🎆 Maximum quality mode ({steps} steps)")
         cfg_scale = 4.0
     
     # Edit
@@ -316,7 +321,7 @@ def test():
             subprocess.run(["open", str(test_path)], check=True)
             print("👀 Opening demo image...")
             
-        print("\n🚀 Ready! Try: python qwen.py generate 'your prompt here' --steps 4")
+        print("\n🚀 Ready! Try: python qwen.py generate 'your prompt here' --steps 20")
         
     except Exception as e:
         print(f"❌ Test failed: {e}")
@@ -346,8 +351,9 @@ def status():
         print(f"🖼️  Images: {len(images)} created")
     
     print("\n💡 Tips:")
-    print("  • Use --steps 4 for fast results")
-    print("  • Use --steps 50 for best quality")
+    print("  • Use --steps 10 for quick stylistic results")
+    print("  • Use --steps 20 for fully formed, quality images")
+    print("  • Use --steps 30 for maximum quality")
     print("  • Drag images into terminal for editing")
     print("  • Run 'python qwen.py test' to verify everything works")
 
