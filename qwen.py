@@ -39,15 +39,15 @@ def load_generation_pipeline():
             torch_dtype=dtype,
         ).to(device)
         
-        # Load Lightning LoRA for 4x speed
+        # Load Lightning LoRA for speed optimization
         try:
             pipeline.load_lora_weights(
                 "lightx2v/Qwen-Image-Lightning", 
                 weight_name="Qwen-Image-Lightning-4steps-V1.0-bf16.safetensors"
             )
             pipeline.fuse_lora()
-            print("⚡ Lightning LoRA loaded - 4x faster!")
-        except:
+            print("⚡ Lightning LoRA loaded - optimized for speed!")
+        except (OSError, ValueError, RuntimeError):
             print("⚠️ Lightning LoRA not available, using standard model")
         
         load_time = time.time() - start
@@ -74,15 +74,15 @@ def load_editing_pipeline():
             torch_dtype=dtype,
         ).to(device)
         
-        # Load Lightning LoRA for 4x speed  
+        # Load Lightning LoRA for speed optimization  
         try:
             pipeline.load_lora_weights(
                 "lightx2v/Qwen-Image-Lightning", 
                 weight_name="Qwen-Image-Lightning-4steps-V1.0-bf16.safetensors"
             )
             pipeline.fuse_lora()
-            print("⚡ Lightning LoRA loaded - 4x faster!")
-        except:
+            print("⚡ Lightning LoRA loaded - optimized for speed!")
+        except (OSError, ValueError, RuntimeError):
             print("⚠️ Lightning LoRA not available, using standard model")
         
         load_time = time.time() - start
@@ -117,7 +117,8 @@ def save_and_preview(image, filename=None):
         try:
             subprocess.run(["open", str(output_path)], check=True)
             print("👀 Opening preview...")
-        except:
+        except subprocess.SubprocessError:
+            # Preview failed, but image was still saved successfully
             pass
     
     return output_path
@@ -155,7 +156,7 @@ def generate(prompt, output, steps, seed, size):
     # Parse size
     try:
         width, height = map(int, size.split('x'))
-    except:
+    except (ValueError, AttributeError):
         print(f"❌ Invalid size format: {size} (use WxH like 1024x1024)")
         sys.exit(1)
     
@@ -232,8 +233,9 @@ def edit(image_path, prompt, output, steps, seed):
     try:
         image = Image.open(img_path).convert("RGB")
         print(f"📏 Input: {image.size[0]}x{image.size[1]} pixels")
-    except Exception as e:
+    except (OSError, ValueError) as e:
         print(f"❌ Could not load image: {e}")
+        print("💡 Make sure the file is a valid image format")
         sys.exit(1)
     
     # Load pipeline
@@ -300,8 +302,8 @@ def test():
         result = pipeline(
             prompt="a cute robot waving hello",
             num_inference_steps=10,
-            width=768,
-            height=768,
+            width=512,
+            height=512,
         )
         gen_time = time.time() - start_time
         

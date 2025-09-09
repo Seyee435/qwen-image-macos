@@ -1,4 +1,4 @@
-# 🎨 Qwen Image for macOS
+# 🎨 Qwen Image Edit for macOS
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
@@ -6,14 +6,14 @@
 [![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-Optimized-green.svg)](https://support.apple.com/en-us/HT211814)
 [![Native Apple Silicon](https://img.shields.io/badge/Native-Apple%20Silicon-brightgreen.svg)](#performance)
 
-**Finally, a native AI image tool that actually uses your Apple Silicon properly.**
+**Finally, a native AI image editing tool that actually uses your Apple Silicon properly.**
 
-I got tired of slow cloud APIs and Docker containers that waste your expensive Apple Silicon. This is different - it runs Qwen Image Edit natively on your Mac with full MPS acceleration. No subscriptions, no Docker, no bullshit.
+I got tired of slow cloud APIs and Docker containers that waste your expensive Apple Silicon. This runs Qwen Image Edit natively on your Mac with full MPS acceleration. Edit photos with natural language, generate images from scratch, all locally. No subscriptions, no Docker, no bullshit.
 
 *This is what Mac AI should have been from day one.*
 
 ```bash
-python qwen.py generate "cyberpunk cityscape at night" --steps 20
+python qwen.py edit example.webp "make the dog look like a superhero" --steps 20
 # 🤯
 ```
 
@@ -28,7 +28,13 @@ pip install -r requirements.txt
 python qwen.py test
 ```
 
-That's it. No Docker, no containers, no virtualization overhead. Pure native Apple Silicon performance. If you have an M1/M2/M3/M4 Mac, this will absolutely fly.
+That's it. No Docker, no containers, no virtualization overhead. The repo includes an example image (`example.webp`) so you can try editing immediately:
+
+```bash
+python qwen.py edit example.webp "make the dog look like a superhero" --steps 20
+```
+
+Pure native Apple Silicon performance. If you have an M1/M2/M3/M4 Mac, this will absolutely fly.
 
 ## ⚡ Performance
 
@@ -42,20 +48,20 @@ Running this on M3 Max with 128GB unified memory:
 ## 🎯 Examples
 
 ```bash
-# Quick stylistic results
-python qwen.py generate "a neon-lit street in Tokyo at night" --steps 10
+# Edit the included example image
+python qwen.py edit example.webp "make the dog look like a superhero" --steps 20
 
-# High quality, fully formed images
-python qwen.py generate "detailed oil painting of a cat" --steps 20
+# Edit your own photos (drag & drop supported!)
+python qwen.py edit IMG_4829.HEIC "oil painting style" --steps 20
 
-# Edit photos (drag & drop supported!)
-python qwen.py edit IMG_4829.HEIC "make it look like a movie poster" --steps 20
+# Transform into different styles
+python qwen.py edit example.webp "turn into a cartoon" --steps 20
 
-# Custom sizes
-python qwen.py generate "ultrawide landscape" --size 1664x928 --steps 20
+# Generate from scratch
+python qwen.py generate "cyberpunk cityscape at night" --steps 20
 
-# Reproducible results
-python qwen.py generate "pixel art robot" --seed 42 --steps 20
+# Custom sizes and settings
+python qwen.py generate "mountain landscape" --size 1024x768 --steps 20 --seed 42
 ```
 
 ## 🧰 What You Need
