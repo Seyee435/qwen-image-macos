@@ -4,7 +4,7 @@
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![macOS](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
 [![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-Optimized-green.svg)](https://support.apple.com/en-us/HT211814)
-[![Lightning Fast](https://img.shields.io/badge/Lightning%20LoRA-4x%20Faster-brightgreen.svg)](#how-fast)
+[![Native Apple Silicon](https://img.shields.io/badge/Native-Apple%20Silicon-brightgreen.svg)](#performance)
 
 **Finally, a native AI image tool that actually uses your Apple Silicon properly.**
 
@@ -70,7 +70,7 @@ python qwen.py generate "pixel art robot" --seed 42 --steps 20
 
 ✅ **Text-to-image generation** - Think it, generate it  
 ✅ **Image editing** - Upload photo, describe changes, done  
-✅ **Lightning LoRA** - 4x faster than normal (this is the magic)  
+✅ **Native MPS acceleration** - Uses Apple Silicon GPU properly
 ✅ **Drag & drop** - Just drag files into terminal like a normal person  
 ✅ **Auto preview** - Images pop open automatically on Mac  
 ✅ **GPU acceleration** - Uses your expensive Apple Silicon  
@@ -78,7 +78,7 @@ python qwen.py generate "pixel art robot" --seed 42 --steps 20
 
 ## 🔧 The Technical Stuff
 
-This uses Alibaba's latest [Qwen-Image](https://huggingface.co/Qwen/Qwen-Image) models which are genuinely incredible. I'm using the Lightning LoRA to make it fast as hell.
+This uses Alibaba's latest [Qwen-Image](https://huggingface.co/Qwen/Qwen-Image) models which are genuinely incredible. Runs natively on Apple Silicon with MPS acceleration for maximum performance.
 
 First run downloads ~20GB of models (they cache locally). After that, it's instant startup.
 
