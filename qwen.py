@@ -90,6 +90,7 @@ def load_generation_pipeline():
 def load_editing_pipeline():
     """Load editing pipeline with Lightning LoRA."""
     print("📥 Loading Qwen Image Edit model...")
+    print("ℹ️  First load can take several minutes due to model size. For a quicker first try, use --steps 12.")
     start = time.time()
     
     try:
@@ -234,7 +235,7 @@ def generate(prompt, output, steps, seed, size):
 @click.argument('image_path')
 @click.argument('prompt')
 @click.option('-o', '--output', help='Output filename')
-@click.option('--steps', default=20, help='Inference steps (10=stylistic, 20=quality, 30=max)')
+@click.option('--steps', default=12, help='Inference steps (10=stylistic, 20=quality, 30=max)')
 @click.option('--seed', type=int, help='Random seed')
 def edit(image_path, prompt, output, steps, seed):
     """Edit an existing image with AI.
