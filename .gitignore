@@ -113,3 +113,6 @@ logs/
 # Temporary files
 tmp/
 temp/
+
+# Cog artifacts
+.cog/

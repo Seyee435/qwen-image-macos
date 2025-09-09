@@ -27,7 +27,7 @@ def setup_device():
 
 def load_generation_pipeline():
     """Load generation pipeline with Lightning LoRA."""
-    print("📥 Loading Qwen Image model (first run downloads ~10GB)...")
+    print("📥 Loading Qwen Image model (first run downloads ~20GB)...")
     start = time.time()
     
     try:
@@ -130,9 +130,9 @@ def cli():
     Fast AI image tools optimized for Apple Silicon.
     
     Examples:
-      qwen generate "a beautiful mountain landscape"
-      qwen edit photo.jpg "make it look like a painting"
-      qwen test
+      python qwen.py generate "a beautiful mountain landscape"
+      python qwen.py edit photo.jpg "make it look like a painting"
+      python qwen.py test
     """
     pass
 
@@ -147,8 +147,8 @@ def generate(prompt, output, steps, seed, size):
     """Generate a new image from text.
     
     Examples:
-      qwen generate "a cyberpunk cityscape at night"
-      qwen generate "cute corgi puppy" --steps 4 --seed 42
+      python qwen.py generate "a cyberpunk cityscape at night"
+      python qwen.py generate "cute corgi puppy" --steps 4 --seed 42
     """
     print(f"🎨 Generating: {prompt}")
     
@@ -211,8 +211,8 @@ def edit(image_path, prompt, output, steps, seed):
     Drag your image file into the terminal after 'qwen edit'!
     
     Examples:
-      qwen edit photo.jpg "add snow to the mountains"
-      qwen edit portrait.png "oil painting style" --steps 4
+      python qwen.py edit photo.jpg "add snow to the mountains"
+      python qwen.py edit portrait.png "oil painting style" --steps 4
     """
     # Handle drag-and-drop paths
     image_path = image_path.strip('"\'')
@@ -349,7 +349,7 @@ def status():
     print("  • Use --steps 4 for fast results")
     print("  • Use --steps 50 for best quality")
     print("  • Drag images into terminal for editing")
-    print("  • Run 'qwen test' to verify everything works")
+    print("  • Run 'python qwen.py test' to verify everything works")
 
 
 if __name__ == '__main__':
