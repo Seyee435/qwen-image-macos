@@ -15,6 +15,7 @@ from rich import print as rprint
 
 from ..core.pipeline import QwenImagePipeline
 from ..core.config import Config
+from ..utils.prompts import get_random_suggestions, show_prompt_help, improve_prompt
 from .. import __version__
 
 
@@ -22,14 +23,27 @@ console = Console()
 
 
 def validate_image_path(ctx, param, value):
-    """Validate that image path exists."""
+    """Validate that image path exists and handle drag-and-drop."""
     if value is None:
         return None
-    path = Path(value)
+    
+    # Handle drag-and-drop paths (often have quotes or spaces)
+    cleaned_path = value.strip('"\' ')
+    path = Path(cleaned_path).expanduser().resolve()
+    
     if not path.exists():
-        raise click.BadParameter(f"Image file not found: {path}")
-    if not path.suffix.lower() in ['.jpg', '.jpeg', '.png', '.bmp', '.tiff']:
-        raise click.BadParameter(f"Unsupported image format: {path.suffix}")
+        # Try common variations for drag-and-drop
+        alt_path = Path(value.replace('\\ ', ' ')).expanduser().resolve()
+        if alt_path.exists():
+            path = alt_path
+        else:
+            raise click.BadParameter(f"Image file not found: {path}\nTip: You can drag and drop image files directly into the terminal")
+    
+    # Support more Mac-friendly formats
+    supported_formats = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.heic', '.webp']
+    if not path.suffix.lower() in supported_formats:
+        raise click.BadParameter(f"Unsupported image format: {path.suffix}\nSupported: {', '.join(supported_formats)}")
+    
     return path
 
 
@@ -81,9 +95,24 @@ def validate_size(ctx, param, value):
 @click.pass_context
 def cli(ctx, config_dir):
     """
-    🎨 Qwen Image Edit for macOS
+    🎨 Qwen Image Edit for macOS - AI-powered image generation and editing
     
-    Professional image generation and editing optimized for Apple Silicon.
+    ✨ Optimized for Apple Silicon with Lightning LoRA acceleration
+    🖼️ Simply drag & drop images directly into the terminal
+    🚀 Generate stunning new images or edit existing ones
+    
+    QUICK START:
+      # Generate a new image
+      qwen-image generate -p "a serene mountain lake at sunset"
+      
+      # Edit an image (drag & drop supported!) 
+      qwen-image edit -i photo.jpg -p "add flying birds in the sky"
+      
+      # Get creative prompt ideas
+      qwen-image suggestions
+      
+      # Check your system status
+      qwen-image status
     """
     ctx.ensure_object(dict)
     
@@ -121,9 +150,16 @@ def get_pipeline(ctx) -> QwenImagePipeline:
 @click.option('--lightning/--no-lightning', default=None, help='Use Lightning LoRA for faster generation')
 @click.option('-o', '--output', help='Output filename (auto-generated if not provided)')
 @click.option('--output-dir', type=click.Path(), help='Output directory (default: ~/.qwen-image-edit/outputs)')
+@click.option('--preview/--no-preview', default=True, help='Automatically preview result (macOS only)')
 @click.pass_context
-def generate(ctx, prompt, negative_prompt, steps, cfg_scale, size, seed, lightning, output, output_dir):
-    """Generate a new image from text description."""
+def generate(ctx, prompt, negative_prompt, steps, cfg_scale, size, seed, lightning, output, output_dir, preview):
+    """🚀 Generate a new image from text description.
+    
+    Examples:
+      qwen-image generate -p "a cyberpunk cityscape at night"
+      qwen-image generate -p "mountain lake sunset" --lightning --size 16:9
+      qwen-image generate -p "cozy coffee shop" -n "people, crowded" --seed 42
+    """
     
     pipeline = get_pipeline(ctx)
     
@@ -141,7 +177,7 @@ def generate(ctx, prompt, negative_prompt, steps, cfg_scale, size, seed, lightni
         
         # Save image
         output_dir_path = Path(output_dir) if output_dir else None
-        saved_path = pipeline.save_image(image, filename=output, output_dir=output_dir_path)
+        saved_path = pipeline.save_image(image, filename=output, output_dir=output_dir_path, preview=preview)
         
         console.print(Panel(
             f"🎉 Image saved to: [bold green]{saved_path}[/bold green]\n"
@@ -164,7 +200,7 @@ def generate(ctx, prompt, negative_prompt, steps, cfg_scale, size, seed, lightni
 
 @cli.command()
 @click.option('-i', '--input', 'input_image', required=True, callback=validate_image_path,
-              help='Path to the input image to edit')
+              help='Path to input image (supports drag & drop!)')
 @click.option('-p', '--prompt', required=True, help='Description of the desired changes')
 @click.option('-n', '--negative-prompt', help='What to avoid in the edited image')
 @click.option('-s', '--steps', type=int, help='Number of inference steps (default: auto)')
@@ -173,9 +209,23 @@ def generate(ctx, prompt, negative_prompt, steps, cfg_scale, size, seed, lightni
 @click.option('--lightning/--no-lightning', default=None, help='Use Lightning LoRA for faster editing')
 @click.option('-o', '--output', help='Output filename (auto-generated if not provided)')
 @click.option('--output-dir', type=click.Path(), help='Output directory (default: ~/.qwen-image-edit/outputs)')
+@click.option('--preview/--no-preview', default=True, help='Automatically preview result (macOS only)')
 @click.pass_context
-def edit(ctx, input_image, prompt, negative_prompt, steps, cfg_scale, seed, lightning, output, output_dir):
-    """Edit an existing image with text instructions."""
+def edit(ctx, input_image, prompt, negative_prompt, steps, cfg_scale, seed, lightning, output, output_dir, preview):
+    """🆼️ Edit an existing image with AI-powered text instructions.
+    
+    🖼️ Simply drag and drop your image file into the terminal!
+    
+    Examples:
+      # Basic editing (drag & drop supported)
+      qwen-image edit -i photo.jpg -p "add sunset lighting"
+      
+      # Style transformation
+      qwen-image edit -i portrait.png -p "make it oil painting style" --lightning
+      
+      # Object modification  
+      qwen-image edit -i landscape.jpg -p "add flying birds" -n "blurry, low quality"
+    """
     
     pipeline = get_pipeline(ctx)
     
@@ -193,7 +243,7 @@ def edit(ctx, input_image, prompt, negative_prompt, steps, cfg_scale, seed, ligh
         
         # Save edited image
         output_dir_path = Path(output_dir) if output_dir else None
-        saved_path = pipeline.save_image(edited_image, filename=output, output_dir=output_dir_path)
+        saved_path = pipeline.save_image(edited_image, filename=output, output_dir=output_dir_path, preview=preview)
         
         console.print(Panel(
             f"🎉 Edited image saved to: [bold green]{saved_path}[/bold green]\n"
@@ -321,6 +371,38 @@ def examples(ctx, output_dir):
         title="Examples Ready",
         style="green"
     ))
+
+
+@cli.command()
+@click.option('--category', type=click.Choice(['style_transfer', 'object_modification', 'lighting_weather', 'clothing_fashion', 'background_scenery']), 
+              help='Show suggestions for a specific category')
+@click.option('--count', default=5, help='Number of suggestions to show')
+def suggestions(category, count):
+    """Show inspiring prompt suggestions for image editing."""
+    
+    if category:
+        suggestions_list = get_random_suggestions(category, count)
+        category_name = category.replace('_', ' ').title()
+        console.print(Panel(
+            f"💡 {category_name} Ideas:\n\n" + 
+            "\n".join(f"  • {s}" for s in suggestions_list),
+            title=f"🎨 {category_name} Suggestions",
+            style="blue"
+        ))
+    else:
+        console.print(Panel(
+            "💡 Popular Image Editing Ideas\n\n" +
+            "Try these prompts with your images:\n\n" +
+            "\n".join(f"  • {s}" for s in get_random_suggestions(count=count)),
+            title="🌟 Prompt Inspiration",
+            style="blue"
+        ))
+    
+    console.print("\n💫 [bold]Pro Tips:[/bold]")
+    console.print("  • Be specific about colors, styles, and details")
+    console.print("  • Try 'Make it look like...' or 'Add...' or 'Change... to...'")
+    console.print("  • Use --lightning for 4x faster results")
+    console.print("\n🎯 [bold]Try it:[/bold] qwen-image edit -i your-image.jpg -p 'your prompt here' --lightning")
 
 
 @cli.command()

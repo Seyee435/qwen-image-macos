@@ -8,6 +8,8 @@ from typing import Optional, Union, Tuple, Dict, Any
 from PIL import Image
 import time
 from datetime import datetime
+import subprocess
+import platform
 
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
@@ -299,6 +301,7 @@ class QwenImagePipeline:
         image: Image.Image,
         filename: Optional[str] = None,
         output_dir: Optional[Path] = None,
+        preview: bool = True,
     ) -> Path:
         """Save image with intelligent naming and organization."""
         
@@ -321,7 +324,23 @@ class QwenImagePipeline:
         else:
             image.save(output_path, "JPEG", quality=self.config.output_config.quality, optimize=True)
         
+        # Auto-preview on Mac if requested
+        if preview and platform.system() == "Darwin":
+            self._show_mac_preview(output_path)
+        
         return output_path
+    
+    def _show_mac_preview(self, image_path: Path) -> None:
+        """Show image preview using macOS Quick Look."""
+        try:
+            subprocess.run(["qlmanage", "-p", str(image_path)], 
+                          check=True, capture_output=True)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            # Fallback to opening in default app
+            try:
+                subprocess.run(["open", str(image_path)], check=True)
+            except subprocess.CalledProcessError:
+                pass  # Silently fail if can't preview
     
     def get_status(self) -> Dict[str, Any]:
         """Get current pipeline status and system information."""
