@@ -1,92 +1,101 @@
 # 🎨 Qwen Image for macOS
 
-**AI image generation and editing on Apple Silicon - Just Works™**
+**Run Qwen Image Edit natively on Apple Silicon. No bullshit.**
 
-Generate stunning images from text or edit existing photos with AI. Optimized for Mac with Apple Silicon GPU acceleration.
+I got tired of waiting for good AI image tools on Mac, so I built this. It's Qwen Image Edit running locally on your MacBook with full GPU acceleration. Simple CLI, stupid fast, just works.
 
 ```bash
-# Generate an image
-python qwen.py generate "a cyberpunk cityscape at night"
-
-# Edit an image (drag & drop supported!)
-python qwen.py edit photo.jpg "make it look like an oil painting"
+python qwen.py generate "cyberpunk cityscape at night" --steps 4
+# 30 seconds later: mind-blown
 ```
 
-## Quick Start
+## Installation
+
+Literally just this:
 
 ```bash
-# Clone and test
 git clone https://github.com/zsxkib/qwen-image-edit-macos.git
 cd qwen-image-edit-macos
-pip install torch torchvision diffusers transformers pillow click
+pip install -r requirements.txt
 python qwen.py test
-
-# Generate your first image
-python qwen.py generate "a beautiful mountain landscape" --steps 4
 ```
 
-**That's it.** No conda, no complex setup, no configuration files.
+That's it. No conda environments, no Docker, no 50-step setup guides. If you have a Mac with Apple Silicon, this will work.
 
-## Performance on Apple Silicon
+## How Fast?
 
-- **Lightning mode** (`--steps 4`): ~30 seconds for 1024x1024 images
-- **Quality mode** (`--steps 50`): ~4 minutes for best results  
-- **Apple Silicon GPU**: Automatically detected and used
-- **Memory efficient**: Works on 16GB+ Macs
+I'm running this on an M3 Pro and it's genuinely stupid fast:
+
+- **Lightning mode**: ~30 seconds for 1024x1024 images
+- **Quality mode**: ~4 minutes when you want it perfect
+- **Your GPU**: Automatically uses Apple Silicon MPS
+- **Memory**: Works fine on 16GB, better on 32GB+
 
 ## Examples
 
 ```bash
-# Fast generation
-python qwen.py generate "sunset over ocean" --steps 4
+# Generate something cool
+python qwen.py generate "a neon-lit street in Tokyo at night" --steps 4
 
-# High quality 
-python qwen.py generate "detailed portrait" --steps 50
+# Edit photos (literally drag the file into terminal)
+python qwen.py edit IMG_4829.HEIC "make it look like a movie poster"
 
-# Custom size
-python qwen.py generate "wide landscape" --size 1664x928
+# Want higher quality? More steps
+python qwen.py generate "detailed oil painting of a cat" --steps 50
 
-# Edit images (drag files right into the terminal!)
-python qwen.py edit vacation_photo.jpg "add dramatic clouds"
-python qwen.py edit portrait.png "oil painting style" --steps 4
+# Custom sizes
+python qwen.py generate "ultrawide landscape" --size 1664x928
 ```
 
-## Requirements
+## What You Need
 
-- **macOS** with Apple Silicon (M1/M2/M3/M4)
-- **Python 3.8+** 
-- **16GB+ RAM** recommended
+- MacBook with Apple Silicon (M1/M2/M3/M4)
+- Python 3.8+ (you probably have this)
+- 16GB+ RAM (32GB+ is better but not required)
 
-Works on Intel Macs too, just slower.
+*Technically works on Intel Macs but why would you do that to yourself?*
 
 ## What You Get
 
-- ✅ Text-to-image generation with Qwen-Image
-- ✅ Image editing with Qwen-Image-Edit  
-- ✅ Lightning LoRA for 4x speed boost
-- ✅ Drag-and-drop image support
-- ✅ Auto-preview on macOS
-- ✅ Apple Silicon MPS acceleration
-- ✅ Simple single-file CLI
-- ✅ No complex configuration
+✅ **Text-to-image generation** - Think it, generate it  
+✅ **Image editing** - Upload photo, describe changes, done  
+✅ **Lightning LoRA** - 4x faster than normal (this is the magic)  
+✅ **Drag & drop** - Just drag files into terminal like a normal person  
+✅ **Auto preview** - Images pop open automatically on Mac  
+✅ **GPU acceleration** - Uses your expensive Apple Silicon  
+✅ **Single file** - It's literally just `qwen.py`  
 
-## Behind the Scenes
+## The Technical Stuff
 
-Uses the state-of-the-art [Qwen-Image](https://huggingface.co/Qwen/Qwen-Image) and [Qwen-Image-Edit](https://huggingface.co/Qwen/Qwen-Image-Edit) models from Alibaba with [Lightning LoRA](https://huggingface.co/lightx2v/Qwen-Image-Lightning) acceleration.
+This uses Alibaba's latest [Qwen-Image](https://huggingface.co/Qwen/Qwen-Image) models which are genuinely incredible. I'm using the Lightning LoRA to make it fast as hell.
 
-Models automatically download on first use (~20GB total) and cache locally.
+First run downloads ~20GB of models (they cache locally). After that, it's instant startup.
 
-## Troubleshooting
+## If Something Breaks
 
-**Not using Apple Silicon GPU?**
+**GPU not working?**
 ```bash
 python -c "import torch; print('MPS available:', torch.backends.mps.is_available())"
 ```
+Should say `True`. If not, your Mac is too old or something.
 
-**Out of memory?** Use `--steps 4` for lighter usage or close other apps.
+**Out of memory?** Close Chrome (you have 47 tabs open). Or use `--steps 4`.
 
-**Slow generation?** First run downloads models (~20GB). Subsequent runs are much faster.
+**First run slow?** It's downloading 20GB of models. Go make coffee. After that it's fast.
+
+**Images look bad?** Try `--steps 50` instead of `--steps 4`. Quality vs speed tradeoff.
+
+## Commands
+
+```bash
+python qwen.py generate "<prompt>" [--steps 4] [--size 1024x1024] [--seed 42]
+python qwen.py edit <image> "<changes>" [--steps 4] 
+python qwen.py status  # Check if everything's working
+python qwen.py test    # Quick test
+```
 
 ---
 
-**Just want to generate images with AI on your Mac? This is it.**
+*I built this because I wanted to generate images on my Mac without dealing with cloud APIs, slow web interfaces, or running random Docker containers. It just works.*
+
+**Star this if it saved you time** ❤️
