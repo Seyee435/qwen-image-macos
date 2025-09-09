@@ -9,7 +9,6 @@ Just works. No complexity.
 import torch
 import click
 import time
-import sys
 from pathlib import Path
 from PIL import Image
 import platform
@@ -54,10 +53,10 @@ def load_generation_pipeline():
         print(f"✅ Ready in {load_time:.1f}s")
         return pipeline, device
         
-    except Exception as e:
-        print(f"❌ Failed to load model: {e}")
-        print("💡 Try: pip install --upgrade diffusers transformers")
-        sys.exit(1)
+    except (ImportError, OSError, RuntimeError, ValueError) as err:
+        raise click.ClickException(
+            f"Failed to load model: {err}\nTry: pip install --upgrade diffusers transformers"
+        )
 
 
 def load_editing_pipeline():
@@ -89,10 +88,10 @@ def load_editing_pipeline():
         print(f"✅ Ready in {load_time:.1f}s")
         return pipeline, device
         
-    except Exception as e:
-        print(f"❌ Failed to load editing model: {e}")
-        print("💡 Try: pip install --upgrade diffusers transformers")
-        sys.exit(1)
+    except (ImportError, OSError, RuntimeError, ValueError) as err:
+        raise click.ClickException(
+            f"Failed to load editing model: {err}\nTry: pip install --upgrade diffusers transformers"
+        )
 
 
 def save_and_preview(image, filename=None):
@@ -157,8 +156,9 @@ def generate(prompt, output, steps, seed, size):
     try:
         width, height = map(int, size.split('x'))
     except (ValueError, AttributeError):
-        print(f"❌ Invalid size format: {size} (use WxH like 1024x1024)")
-        sys.exit(1)
+        raise click.ClickException(
+            f"Invalid size format: {size} (use WxH like 1024x1024)"
+        )
     
     # Load pipeline
     pipeline, device = load_generation_pipeline()
@@ -222,9 +222,9 @@ def edit(image_path, prompt, output, steps, seed):
     img_path = Path(image_path)
     
     if not img_path.exists():
-        print(f"❌ Image not found: {img_path}")
-        print("💡 Tip: Drag your image into the terminal!")
-        sys.exit(1)
+        raise click.ClickException(
+            f"Image not found: {img_path}\nTip: Drag your image into the terminal!"
+        )
     
     print(f"✏️ Editing: {img_path.name}")
     print(f"📝 Edit: {prompt}")
@@ -233,10 +233,10 @@ def edit(image_path, prompt, output, steps, seed):
     try:
         image = Image.open(img_path).convert("RGB")
         print(f"📏 Input: {image.size[0]}x{image.size[1]} pixels")
-    except (OSError, ValueError) as e:
-        print(f"❌ Could not load image: {e}")
-        print("💡 Make sure the file is a valid image format")
-        sys.exit(1)
+    except (OSError, ValueError) as err:
+        raise click.ClickException(
+            f"Could not load image: {err}\nMake sure the file is a valid image format"
+        )
     
     # Load pipeline
     pipeline, device = load_editing_pipeline()
@@ -326,10 +326,10 @@ def test():
             
         print("\n🚀 Ready! Try: python qwen.py generate 'your prompt here' --steps 20")
         
-    except Exception as e:
-        print(f"❌ Test failed: {e}")
-        print("💡 Try: pip install --upgrade torch diffusers transformers")
-        sys.exit(1)
+    except (RuntimeError, OSError, ValueError) as err:
+        raise click.ClickException(
+            f"Test failed: {err}\nTry: pip install --upgrade torch diffusers transformers"
+        )
 
 
 @cli.command()
