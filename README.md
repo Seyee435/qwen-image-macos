@@ -13,8 +13,8 @@ I got tired of slow cloud APIs and Docker containers that waste your expensive A
 *This is what Mac AI should have been from day one.*
 
 ```bash
-python qwen.py generate "cyberpunk cityscape at night" --steps 4
-# 30 seconds later: 🤯
+python qwen.py generate "cyberpunk cityscape at night" --steps 8
+# 70 seconds later: 🤯
 ```
 
 ## 🚀 Installation
@@ -34,19 +34,19 @@ That's it. No Docker, no containers, no virtualization overhead. Pure native App
 
 I'm running this on an M3 Pro and it's genuinely stupid fast:
 
-- **Lightning mode**: ~30 seconds for 1024x1024 images
-- **Quality mode**: ~4 minutes when you want it perfect
+- **Fast mode (8 steps)**: ~70 seconds for 1024x1024 images
+- **Quality mode (10-20 steps)**: ~90s-3 minutes for best results
 - **Your GPU**: Automatically uses Apple Silicon MPS
 - **Memory**: Works fine on 16GB, better on 32GB+
 
 ## 🎯 Examples
 
 ```bash
-# Generate something cool (lightning fast)
-python qwen.py generate "a neon-lit street in Tokyo at night" --steps 4
+# Generate something cool (fast & good quality)
+python qwen.py generate "a neon-lit street in Tokyo at night" --steps 8
 
 # Edit photos (drag & drop supported!)
-python qwen.py edit IMG_4829.HEIC "make it look like a movie poster" --steps 4
+python qwen.py edit IMG_4829.HEIC "make it look like a movie poster" --steps 8
 
 # High quality (more steps)
 python qwen.py generate "detailed oil painting of a cat" --steps 50
@@ -108,8 +108,8 @@ python qwen.py generate "your idea" [options]
 python qwen.py edit image.jpg "your edit description"
 
 # Key options:
---steps 4     # Lightning fast  
---steps 50    # High quality
+--steps 8     # Fast & good quality  
+--steps 15    # High quality
 --size 1024x1024  # Custom size
 --seed 42     # Reproducible
 --output filename.png  # Custom output name
