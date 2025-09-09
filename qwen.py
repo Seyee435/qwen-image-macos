@@ -12,6 +12,34 @@ import time
 from pathlib import Path
 from PIL import Image
 import platform
+import warnings
+from diffusers.utils import logging as diffusers_logging
+from transformers.utils import logging as transformers_logging
+
+
+def _configure_logging():
+    """Configure library loggers to reduce noisy warnings by default.
+
+    Users can opt into verbose logs by setting QWEN_VERBOSE=1 in the
+    environment before running the CLI.
+    """
+    import os
+    verbose = os.environ.get("QWEN_VERBOSE") in {"1", "true", "True"}
+    if verbose:
+        diffusers_logging.set_verbosity_warning()
+        transformers_logging.set_verbosity_warning()
+        # Show warnings normally in verbose mode
+        warnings.filterwarnings("default")
+    else:
+        # Keep third-party libraries quiet unless something is wrong
+        diffusers_logging.set_verbosity_error()
+        transformers_logging.set_verbosity_error()
+        # Hide common library chatter that users can't act on
+        warnings.filterwarnings("ignore", category=UserWarning)
+        warnings.filterwarnings("ignore", category=FutureWarning)
+
+
+_configure_logging()
 
 
 def setup_device():
@@ -35,7 +63,7 @@ def load_generation_pipeline():
         
         pipeline = QwenImagePipeline.from_pretrained(
             "Qwen/Qwen-Image",
-            torch_dtype=dtype,
+            dtype=dtype,
         ).to(device)
         
         # Load Lightning LoRA for speed optimization
@@ -70,7 +98,7 @@ def load_editing_pipeline():
         
         pipeline = QwenImageEditPipeline.from_pretrained(
             "Qwen/Qwen-Image-Edit",
-            torch_dtype=dtype,
+            dtype=dtype,
         ).to(device)
         
         # Load Lightning LoRA for speed optimization  
