@@ -4,33 +4,42 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![macOS](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
 [![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-optimized-green.svg)](https://support.apple.com/en-us/HT211814)
+[![Drag & Drop](https://img.shields.io/badge/Drag%20%26%20Drop-supported-brightgreen.svg)]()
 
-Professional image generation and editing with **Qwen Image Edit**, thoughtfully optimized for Apple Silicon Macs. Perfect for ML newcomers and experienced users alike.
+Professional AI image generation and editing optimized for macOS. **Simply drag & drop images directly into your terminal** for effortless editing with world-class results.
+
+> ✨ **New in v1.1**: Enhanced drag-and-drop support, automatic Quick Look previews, and intelligent prompt suggestions make this the most Mac-friendly AI image editor available.
 
 ![Demo](assets/demo.gif)
 
 ## ✨ Why This Package?
 
-If you're new to ML on Mac, this is the **easiest way** to get professional image generation running locally:
+The **most Mac-friendly AI image editor** with features designed specifically for macOS users:
 
-- 🚀 **One-command setup** - Just run `python setup.py` and you're ready
-- 🧠 **Intelligent defaults** - Automatically optimizes for your Mac's hardware
-- 💡 **Beginner-friendly** - Clear error messages and helpful guidance
-- ⚡ **Apple Silicon optimized** - Uses MPS for 10x faster generation
-- 🎯 **Production-ready** - World-class code without complexity
+- 🖼️ **Drag & Drop Magic** - Simply drag images from Finder into your terminal
+- 🔍 **Quick Look Integration** - Automatic previews of edited images on macOS
+- ⚡ **Lightning Fast** - Apple Silicon MPS optimization + Lightning LoRA acceleration
+- 💡 **Smart Suggestions** - AI-powered prompt ideas and creative inspiration
+- 🎮 **Zero Friction** - One-command setup, intelligent defaults, just works
+- 🌍 **World-Class Results** - Professional-grade image editing with Qwen's state-of-the-art model
 
 ## 🎥 Quick Demo
 
 ```bash
-# Generate an image
-qwen-image generate -p "A serene mountain lake at sunset"
+# Generate an image with Lightning speed
+qwen-image generate -p "A serene mountain lake at sunset" --lightning
 
-# Edit an existing image
-qwen-image edit -i photo.jpg -p "Add snow to the mountains"
+# Edit with drag & drop (just drag your image into the terminal!)
+qwen-image edit -i [DRAG IMAGE HERE] -p "Add snow to the mountains"
 
-# Check your system
+# Get creative prompt ideas
+qwen-image suggestions
+
+# Check your system optimization 
 qwen-image status
 ```
+
+> 🖼️ **Pro tip**: Drag any image file from Finder directly into the terminal instead of typing paths!
 
 ## 📋 Requirements
 
@@ -100,6 +109,38 @@ qwen-image edit -i landscape.png -p "Make it winter with snow"
 qwen-image examples
 ```
 Generates 3 example images to test everything works.
+
+## 🖼️ Drag & Drop Magic
+
+The most intuitive way to edit images on Mac - **no typing paths required!**
+
+### How it works:
+1. **Open your terminal** and start typing: `qwen-image edit -i `
+2. **Drag any image from Finder** directly into the terminal window
+3. **Add your editing prompt**: `-p "make it look like a painting"`
+4. **Press Enter** - your edited image will automatically preview in Quick Look!
+
+### Supported formats:
+✅ **Common formats**: JPG, PNG, BMP, TIFF  
+✅ **Mac-native formats**: HEIC (iPhone photos), WebP  
+✅ **Special characters**: Handles spaces, quotes, and special characters automatically
+
+### Example workflow:
+```bash
+# 1. Start typing the command
+qwen-image edit -i 
+
+# 2. Drag your "My Vacation Photo.HEIC" from Finder into terminal
+# The terminal shows: qwen-image edit -i "/Users/you/Photos/My Vacation Photo.HEIC"
+
+# 3. Complete the command
+qwen-image edit -i "/Users/you/Photos/My Vacation Photo.HEIC" -p "add sunset lighting" --lightning
+
+# 4. Press Enter and watch the magic happen! ✨
+# Your edited image automatically opens in Quick Look
+```
+
+> 📝 **Interactive demo**: Run `python examples/drag_drop_demo.py` for a guided tour of all features!
 
 ## 🚀 Features
 
