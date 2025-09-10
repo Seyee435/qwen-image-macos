@@ -59,6 +59,13 @@ bash scripts/setup_gguf.sh
 
 The standard CLI (diffusers) remains available below; GGUF is optional.
 
+Headless submit to ComfyUI API (optional):
+
+```bash
+# After ComfyUI is running and you exported a workflow in API format
+python scripts/comfy_submit.py --workflow path/to/workflow_api.json --timeout 600
+```
+
 ## 🎯 Examples
 
 ```bash
