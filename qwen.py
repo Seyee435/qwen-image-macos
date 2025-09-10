@@ -65,8 +65,19 @@ def load_generation_pipeline():
             "Qwen/Qwen-Image",
             dtype=dtype,
         ).to(device)
+
+        # Prefer a faster scheduler when possible
+        try:
+            from diffusers import DPMSolverMultistepScheduler
+            pipeline.scheduler = DPMSolverMultistepScheduler.from_config(pipeline.scheduler.config)
+        except (ImportError, AttributeError):
+            pass
+
+        # Reduce memory spikes that can slow MPS
+        pipeline.enable_attention_slicing()
+        pipeline.enable_vae_tiling()
         
-        # Load Lightning LoRA for speed optimization
+        # Load Lightning LoRA for speed optimization (best-effort)
         try:
             pipeline.load_lora_weights(
                 "lightx2v/Qwen-Image-Lightning", 
@@ -101,8 +112,13 @@ def load_editing_pipeline():
             "Qwen/Qwen-Image-Edit",
             dtype=dtype,
         ).to(device)
+
+        # Keep default scheduler for Edit pipeline (Qwen-Image-Edit uses a custom schedule)
+        # Reduce memory spikes that can slow MPS
+        pipeline.enable_attention_slicing()
+        pipeline.enable_vae_tiling()
         
-        # Load Lightning LoRA for speed optimization  
+        # Load Lightning LoRA for speed optimization (best-effort)
         try:
             pipeline.load_lora_weights(
                 "lightx2v/Qwen-Image-Lightning", 
@@ -280,13 +296,13 @@ def edit(image_path, prompt, output, steps, seed):
     # Show settings  
     if steps <= 10:
         print(f"🎨 Quick mode ({steps} steps) - stylistic results")
-        cfg_scale = 2.0
+        cfg_scale = 1.5
     elif steps <= 25:
         print(f"🎨 Quality mode ({steps} steps) - fully formed")
-        cfg_scale = 4.0
+        cfg_scale = 3.0
     else:
         print(f"🎆 Maximum quality mode ({steps} steps)")
-        cfg_scale = 4.0
+        cfg_scale = 3.5
     
     # Edit
     print("Editing...")

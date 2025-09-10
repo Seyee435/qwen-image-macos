@@ -45,6 +45,20 @@ Running this on M3 Max with 128GB unified memory:
 - **Your GPU**: Automatically uses Apple Silicon MPS
 - **Memory**: Works fine on 32GB+, excellent on 64GB+
 
+## 🏎️ Faster edits on Mac (optional GGUF)
+
+If you want the fastest edit experience on Apple Silicon today, use the optional ComfyUI + GGUF path. It runs quantized Qwen-Image-Edit and supports 4/8-step Lightning-style workflows.
+
+- One command setup:
+
+```bash
+bash scripts/setup_gguf.sh
+```
+
+- Then open http://127.0.0.1:8188 and load a Qwen-Image-Edit GGUF workflow (see docs/FAST_EDIT_GGUF.md). Start with 512×512, 4–8 steps, CFG ~1.0–2.0.
+
+The standard CLI (diffusers) remains available below; GGUF is optional.
+
 ## 🎯 Examples
 
 ```bash
