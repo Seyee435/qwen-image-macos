@@ -5,16 +5,15 @@
 [![macOS](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
 [![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-Optimized-green.svg)](https://support.apple.com/en-us/HT211814)
 
-Native, fast, Apple Silicon–accelerated text-to-image generation with Qwen Image. No Docker, no cloud, no complexity.
+Native, fast, Apple Silicon–accelerated text-to-image generation with Qwen Image. Lightning LoRA acceleration for quick 4–8 step generations. No Docker, no cloud, no complexity.
 
 ## 🚀 Installation
 
 Clone, install, and run:
 
 ```bash
-# use your repo URL (rename coming soon)
-# git clone https://github.com/<you>/<repo>.git
-cd qwen-image-edit
+git clone https://github.com/zsxkib/qwen-image-macos.git
+cd qwen-image-macos
 pip install -r requirements.txt
 python qwen.py test
 ```

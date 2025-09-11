@@ -68,6 +68,36 @@ def load_generation_pipeline():
         # Reduce memory spikes that can slow MPS
         pipeline.enable_attention_slicing()
         pipeline.enable_vae_tiling()
+
+        # Try to load Lightning LoRA for speed (best-effort)
+        lora_loaded = False
+        try:
+            # Primary known weight name
+            pipeline.load_lora_weights(
+                "lightx2v/Qwen-Image-Lightning",
+                weight_name="Qwen-Image-Lightning-4steps-V1.0-bf16.safetensors",
+            )
+            lora_loaded = True
+        except Exception:
+            try:
+                # Fallback to another common filename if present
+                pipeline.load_lora_weights(
+                    "lightx2v/Qwen-Image-Lightning",
+                    weight_name="Qwen-Image-Lightning-4steps-V1.0.safetensors",
+                )
+                lora_loaded = True
+            except Exception:
+                pass
+        if lora_loaded:
+            try:
+                pipeline.fuse_lora()
+            except Exception:
+                pass
+            setattr(pipeline, "_lora_loaded", True)
+            print("⚡ Lightning LoRA loaded - optimized for 4–8 step generation!")
+        else:
+            setattr(pipeline, "_lora_loaded", False)
+            print("ℹ️ Lightning LoRA not found; using standard model")
         
         load_time = time.time() - start
         print(f"✅ Ready in {load_time:.1f}s")
@@ -165,6 +195,9 @@ def generate(prompt, output, steps, seed, size):
         print(f"🎆 Maximum quality mode ({steps} steps)")
     
     print(f"📐 Size: {width}x{height}")
+
+    if getattr(pipeline, "_lora_loaded", False):
+        print("⚡ Lightning LoRA active — try --steps 4–8 for very fast results")
     
     # Generate
     print("Generating...")
