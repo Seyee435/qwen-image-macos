@@ -35,7 +35,7 @@ INPUTS_DIR = COMFY / "input"
 def pick_first(dirpath: Path, suffixes: tuple[str, ...]) -> str | None:
     if not dirpath.exists():
         return None
-    files = sorted([p.name for p in dirpath.iterdir() if p.is_file() and p.suffix in suffixes])
+    files = sorted([p.relative_to(dirpath).as_posix() for p in dirpath.rglob("*") if p.is_file() and p.suffix in suffixes])
     return files[0] if files else None
 
 
@@ -45,6 +45,8 @@ def main() -> int:
     p.add_argument("--prompt", required=True, help="Edit prompt")
     p.add_argument("--steps", type=int, default=8)
     p.add_argument("--cfg", type=float, default=1.5)
+    p.add_argument("--denoise", type=float, default=0.55)
+    p.add_argument("--clip-type", default="sd3", choices=["stable_diffusion","sd3"]) 
     p.add_argument("--negative", default=" ")
     p.add_argument("--out", default="workflow_api.json")
     args = p.parse_args()
@@ -100,7 +102,7 @@ def main() -> int:
     clip_node = n()
     nodes[clip_node] = {
         "class_type": "CLIPLoaderGGUF",
-        "inputs": {"clip_name": clip_name, "type": "stable_diffusion"},
+        "inputs": {"clip_name": clip_name, "type": args.clip_type},
     }
 
     # 4) Encode positive prompt
@@ -123,7 +125,7 @@ def main() -> int:
     vae_encode = n()
     nodes[vae_encode] = {
         "class_type": "VAEEncode",
-        "inputs": {"vae": [vae_node, 0], "image": [load_img, 0]},
+        "inputs": {"vae": [vae_node, 0], "pixels": [load_img, 0]},
     }
 
     # 7) KSampler edit
@@ -137,6 +139,7 @@ def main() -> int:
             "cfg": args.cfg,
             "sampler_name": "euler",
             "scheduler": "karras",
+            "denoise": args.denoise,
             "positive": [pos_node, 0],
             "negative": [neg_node, 0],
             "latent_image": [vae_encode, 0],

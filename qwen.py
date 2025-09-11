@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-🎨 Qwen Image for macOS - AI image generation and editing
+🎨 Qwen Image for macOS - Native text-to-image generator
 
-Simple, fast AI image tools optimized for Apple Silicon.
-Just works. No complexity.
+Simple, fast, Apple Silicon–optimized. Just works. No complexity.
 """
 
 import torch
@@ -13,6 +12,7 @@ from pathlib import Path
 from PIL import Image
 import platform
 import warnings
+import subprocess
 from diffusers.utils import logging as diffusers_logging
 from transformers.utils import logging as transformers_logging
 
@@ -98,45 +98,6 @@ def load_generation_pipeline():
         )
 
 
-def load_editing_pipeline():
-    """Load editing pipeline with Lightning LoRA."""
-    print("📥 Loading Qwen Image Edit model...")
-    print("ℹ️  First load can take several minutes due to model size. For a quicker first try, use --steps 12.")
-    start = time.time()
-    
-    try:
-        from diffusers import QwenImageEditPipeline
-        device, dtype = setup_device()
-        
-        pipeline = QwenImageEditPipeline.from_pretrained(
-            "Qwen/Qwen-Image-Edit",
-            dtype=dtype,
-        ).to(device)
-
-        # Keep default scheduler for Edit pipeline (Qwen-Image-Edit uses a custom schedule)
-        # Reduce memory spikes that can slow MPS
-        pipeline.enable_attention_slicing()
-        pipeline.enable_vae_tiling()
-        
-        # Load Lightning LoRA for speed optimization (best-effort)
-        try:
-            pipeline.load_lora_weights(
-                "lightx2v/Qwen-Image-Lightning", 
-                weight_name="Qwen-Image-Lightning-4steps-V1.0-bf16.safetensors"
-            )
-            pipeline.fuse_lora()
-            print("⚡ Lightning LoRA loaded - optimized for speed!")
-        except (OSError, ValueError, RuntimeError):
-            print("⚠️ Lightning LoRA not available, using standard model")
-        
-        load_time = time.time() - start
-        print(f"✅ Ready in {load_time:.1f}s")
-        return pipeline, device
-        
-    except (ImportError, OSError, RuntimeError, ValueError) as err:
-        raise click.ClickException(
-            f"Failed to load editing model: {err}\nTry: pip install --upgrade diffusers transformers"
-        )
 
 
 def save_and_preview(image, filename=None):
@@ -170,13 +131,12 @@ def save_and_preview(image, filename=None):
 
 @click.group()
 def cli():
-    """🎨 Qwen Image - AI image generation and editing for macOS
+    """🎨 Qwen Image - Native text-to-image for macOS
     
-    Fast AI image tools optimized for Apple Silicon.
+    Fast AI image generation optimized for Apple Silicon.
     
     Examples:
       python qwen.py generate "a beautiful mountain landscape"
-      python qwen.py edit photo.jpg "make it look like a painting"
       python qwen.py test
     """
     pass
@@ -247,83 +207,6 @@ def generate(prompt, output, steps, seed, size):
     print(f"📁 Location: {output_path.parent}")
 
 
-@cli.command()
-@click.argument('image_path')
-@click.argument('prompt')
-@click.option('-o', '--output', help='Output filename')
-@click.option('--steps', default=12, help='Inference steps (10=stylistic, 20=quality, 30=max)')
-@click.option('--seed', type=int, help='Random seed')
-def edit(image_path, prompt, output, steps, seed):
-    """Edit an existing image with AI.
-    
-    Drag your image file into the terminal after 'qwen edit'!
-    
-    Examples:
-      python qwen.py edit photo.jpg "add snow to the mountains"
-      python qwen.py edit portrait.png "oil painting style" --steps 20
-    """
-    # Handle drag-and-drop paths
-    image_path = image_path.strip('"\'')
-    img_path = Path(image_path)
-    
-    if not img_path.exists():
-        raise click.ClickException(
-            f"Image not found: {img_path}\nTip: Drag your image into the terminal!"
-        )
-    
-    print(f"✏️ Editing: {img_path.name}")
-    print(f"📝 Edit: {prompt}")
-    
-    # Load and validate image
-    try:
-        image = Image.open(img_path).convert("RGB")
-        print(f"📏 Input: {image.size[0]}x{image.size[1]} pixels")
-    except (OSError, ValueError) as err:
-        raise click.ClickException(
-            f"Could not load image: {err}\nMake sure the file is a valid image format"
-        )
-    
-    # Load pipeline
-    pipeline, device = load_editing_pipeline()
-    
-    # Setup generator
-    generator = None
-    if seed is not None:
-        generator = torch.Generator(device="cpu" if device.type == "mps" else device)
-        generator.manual_seed(seed)
-        print(f"🎲 Seed: {seed}")
-    
-    # Show settings  
-    if steps <= 10:
-        print(f"🎨 Quick mode ({steps} steps) - stylistic results")
-        cfg_scale = 1.5
-    elif steps <= 25:
-        print(f"🎨 Quality mode ({steps} steps) - fully formed")
-        cfg_scale = 3.0
-    else:
-        print(f"🎆 Maximum quality mode ({steps} steps)")
-        cfg_scale = 3.5
-    
-    # Edit
-    print("Editing...")
-    start = time.time()
-    
-    result = pipeline(
-        image=image,
-        prompt=prompt,
-        num_inference_steps=steps,
-        true_cfg_scale=cfg_scale,
-        generator=generator,
-    )
-    
-    edit_time = time.time() - start
-    
-    # Save and preview
-    edited_image = result.images[0]
-    output_path = save_and_preview(edited_image, output)
-    
-    print(f"✅ Edited in {edit_time:.1f}s")
-    print(f"📁 Location: {output_path.parent}")
 
 
 @cli.command()
@@ -398,12 +281,13 @@ def status():
         images = list(output_dir.glob("*.png")) + list(output_dir.glob("*.jpg"))
         print(f"🖼️  Images: {len(images)} created")
     
-    print("\n💡 Tips:")
-    print("  • Use --steps 10 for quick stylistic results")
-    print("  • Use --steps 20 for fully formed, quality images")
-    print("  • Use --steps 30 for maximum quality")
-    print("  • Drag images into terminal for editing")
-    print("  • Run 'python qwen.py test' to verify everything works")
+print("\n💡 Tips:")
+print("  • Use --steps 10 for quick stylistic results")
+print("  • Use --steps 20 for fully formed, quality images")
+print("  • Use --steps 30 for maximum quality")
+print("  • Run 'python qwen.py test' to verify everything works")
+
+
 
 
 if __name__ == '__main__':

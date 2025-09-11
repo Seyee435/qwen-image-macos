@@ -29,6 +29,9 @@ import requests
 
 
 def submit_prompt(server: str, prompt: Dict[str, Any]) -> str:
+    # Ensure client_id is set for ComfyUI queueing
+    if "client_id" not in prompt:
+        prompt = {**prompt, "client_id": "qwen-image-edit"}
     resp = requests.post(f"{server}/prompt", json=prompt, timeout=30)
     resp.raise_for_status()
     data = resp.json()
@@ -78,8 +81,10 @@ def main() -> int:
 
     # Normalize: ComfyUI expects a dict with a top-level 'prompt'
     if "prompt" not in payload:
-        # If the file itself is the prompt, wrap it
         payload = {"prompt": payload}
+    # Inject a default client_id if not present
+    if "client_id" not in payload:
+        payload["client_id"] = "qwen-image-edit"
 
     print("📤 Submitting workflow to ComfyUI...")
     prompt_id = submit_prompt(args.server, payload)

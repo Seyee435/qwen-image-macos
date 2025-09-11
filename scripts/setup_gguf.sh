@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+FETCH_ONLY=0
+if [[ "${1:-}" == "--fetch-only" ]]; then
+  FETCH_ONLY=1
+fi
+
 # Simple setup script for fast Qwen Image Edit on macOS using ComfyUI + GGUF
 # - Installs ComfyUI to ./external/ComfyUI
 # - Installs ComfyUI-GGUF custom node
@@ -40,79 +45,40 @@ if [ ! -d "$NODES_DIR/ComfyUI-GGUF" ]; then
   git clone --depth=1 https://github.com/city96/ComfyUI-GGUF "$NODES_DIR/ComfyUI-GGUF"
 fi
 
-# 3) Python deps (in a lightweight venv under external/.venv)
+# 3) Python deps (in a dedicated venv under external/.venv)
 if [ ! -d "$EXT_DIR/.venv" ]; then
   echo "Creating virtual environment..."
   python3 -m venv "$EXT_DIR/.venv"
 fi
 source "$EXT_DIR/.venv/bin/activate"
-pip install --upgrade pip
-# minimal deps; ComfyUI will install more on first run if needed
-pip install requests >/dev/null 2>&1 || true
+python -m pip install --upgrade pip setuptools wheel
 
-# 4) Download GGUF assets (use Q4_0 for balance). Adjust if you have more RAM.
-GGUF_REPO="https://huggingface.co/QuantStack/Qwen-Image-Edit-GGUF/resolve/main"
+# Install PyTorch (known-good for macOS Sequoia with ComfyUI-GGUF)
+# NOTE: If you already have a working torch in this venv, this will be a no-op
+python -m pip install "torch==2.4.1" "torchvision==0.19.1" "torchaudio==2.4.1" --upgrade --quiet || true
 
-# Helper to download and sanity-check (>1KB)
-download() {
-  local url="$1" out="$2"
-  curl -L "$url" -o "$out"
-  if [ -f "$out" ]; then
-    local size
-    size=$(stat -f%z "$out" 2>/dev/null || stat -c%s "$out" 2>/dev/null || echo 0)
-    if [ "$size" -lt 1024 ]; then
-      echo "Download looked wrong (size $size). Removing $out"
-      rm -f "$out"
-      return 1
-    fi
-  fi
-}
-
-# Main UNet (choose Q4_0 ~11.9GB)
-UNET_FILE="Qwen_Image_Edit-Q4_0.gguf"
-if [ ! -f "$UNET_DIR/$UNET_FILE" ]; then
-  echo "Downloading UNet GGUF ($UNET_FILE)..."
-  download "$GGUF_REPO/$UNET_FILE" "$UNET_DIR/$UNET_FILE" || {
-    echo "Failed to fetch $UNET_FILE"; exit 1; }
+# Install ComfyUI requirements (includes psutil and friends)
+if [ -f "$COMFY_DIR/requirements.txt" ]; then
+  python -m pip install -r "$COMFY_DIR/requirements.txt" --upgrade --quiet || true
 fi
 
-# VAE safetensors
-VAE_FILE="Qwen_Image-VAE.safetensors"
-if [ ! -f "$VAE_DIR/$VAE_FILE" ]; then
-  echo "Downloading VAE ($VAE_FILE)..."
-  download "$GGUF_REPO/$VAE_FILE" "$VAE_DIR/$VAE_FILE" || {
-    echo "Failed to fetch $VAE_FILE"; exit 1; }
+# Install ComfyUI-GGUF requirements (gguf>=0.13.0, sentencepiece, protobuf)
+if [ -f "$NODES_DIR/ComfyUI-GGUF/requirements.txt" ]; then
+  python -m pip install -r "$NODES_DIR/ComfyUI-GGUF/requirements.txt" --upgrade --quiet || true
 fi
 
-# Text encoder (try common filenames)
-TE_CANDIDATES=(
-  "Qwen2.5-VL-7B-Instruct-Q4_0.gguf"
-  "Qwen2.5-VL-7B-Q4_0.gguf"
-  "Qwen2.5-VL-7B-Instruct-Q3_K_M.gguf"
-  "Qwen2.5-VL-7B-Instruct-Q5_K_M.gguf"
-)
-TE_FOUND=0
-for f in "${TE_CANDIDATES[@]}"; do
-  if [ -f "$TEXT_DIR/$f" ]; then TE_FOUND=1; TE_FILE="$f"; break; fi
-  echo "Trying text encoder $f..."
-  if download "$GGUF_REPO/$f" "$TEXT_DIR/$f"; then
-    TE_FOUND=1; TE_FILE="$f"; break
-  fi
-done
-if [ "$TE_FOUND" -ne 1 ]; then
-  echo "Could not download a Qwen2.5-VL-7B text encoder GGUF. Check repo for available filenames."; exit 1
-fi
+# Extra safety: ensure these are present
+python -m pip install requests huggingface_hub einops pillow tqdm pyyaml psutil --upgrade --quiet || true
 
-# mmproj
-MMPROJ_FILE="Qwen2.5-VL-7B-Instruct-mmproj-BF16.gguf"
-if [ ! -f "$TEXT_DIR/$MMPROJ_FILE" ]; then
-  echo "Downloading mmproj ($MMPROJ_FILE)..."
-  download "$GGUF_REPO/$MMPROJ_FILE" "$TEXT_DIR/$MMPROJ_FILE" || {
-    echo "Failed to fetch $MMPROJ_FILE"; exit 1; }
-fi
+# 4) Download GGUF assets using huggingface_hub (reliable paths)
+python scripts/fetch_gguf.py --unet-dir "$UNET_DIR" --vae-dir "$VAE_DIR" --text-dir "$TEXT_DIR"
 
 echo "\nAll models ready under $MODELS_DIR"
+if [[ "$FETCH_ONLY" == "1" ]]; then
+  echo "Fetch-only mode. Not starting ComfyUI."
+  exit 0
+fi
+
 echo "Starting ComfyUI (Ctrl+C to stop)..."
 cd "$COMFY_DIR"
 python main.py --listen 127.0.0.1 --port 8188
-

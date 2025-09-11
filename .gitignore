@@ -114,5 +114,10 @@ logs/
 tmp/
 temp/
 
+# Local artifacts to ignore
+comfyui-outputs/
+external/
+workflow*.json
+
 # Cog artifacts
 .cog/
