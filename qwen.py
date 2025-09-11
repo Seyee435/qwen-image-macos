@@ -9,7 +9,6 @@ import torch
 import click
 import time
 from pathlib import Path
-from PIL import Image
 import platform
 import warnings
 import subprocess
@@ -66,27 +65,9 @@ def load_generation_pipeline():
             dtype=dtype,
         ).to(device)
 
-        # Prefer a faster scheduler when possible
-        try:
-            from diffusers import DPMSolverMultistepScheduler
-            pipeline.scheduler = DPMSolverMultistepScheduler.from_config(pipeline.scheduler.config)
-        except (ImportError, AttributeError):
-            pass
-
         # Reduce memory spikes that can slow MPS
         pipeline.enable_attention_slicing()
         pipeline.enable_vae_tiling()
-        
-        # Load Lightning LoRA for speed optimization (best-effort)
-        try:
-            pipeline.load_lora_weights(
-                "lightx2v/Qwen-Image-Lightning", 
-                weight_name="Qwen-Image-Lightning-4steps-V1.0-bf16.safetensors"
-            )
-            pipeline.fuse_lora()
-            print("⚡ Lightning LoRA loaded - optimized for speed!")
-        except (OSError, ValueError, RuntimeError):
-            print("⚠️ Lightning LoRA not available, using standard model")
         
         load_time = time.time() - start
         print(f"✅ Ready in {load_time:.1f}s")
@@ -281,11 +262,11 @@ def status():
         images = list(output_dir.glob("*.png")) + list(output_dir.glob("*.jpg"))
         print(f"🖼️  Images: {len(images)} created")
     
-print("\n💡 Tips:")
-print("  • Use --steps 10 for quick stylistic results")
-print("  • Use --steps 20 for fully formed, quality images")
-print("  • Use --steps 30 for maximum quality")
-print("  • Run 'python qwen.py test' to verify everything works")
+    print("\n💡 Tips:")
+    print("  • Use --steps 10 for quick stylistic results")
+    print("  • Use --steps 20 for fully formed, quality images")
+    print("  • Use --steps 30 for maximum quality")
+    print("  • Run 'python qwen.py test' to verify everything works")
 
 
 

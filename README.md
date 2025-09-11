@@ -58,7 +58,6 @@ python qwen.py status  # Show system info
 ## 🔧 Technical Notes
 
 - Uses Alibaba's [Qwen-Image](https://huggingface.co/Qwen/Qwen-Image) via Diffusers
-- Scheduler defaults to DPM-Solver++ Multistep when available
 - Attention slicing and VAE tiling enabled to reduce memory spikes on MPS
 
 ## 🛠️ Troubleshooting
