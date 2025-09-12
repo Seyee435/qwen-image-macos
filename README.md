@@ -71,8 +71,9 @@ cog build
 Quick generate (CPU on macOS):
 
 ```bash
-# 4-step ultra-fast mode with a small 512x512 test to keep it quick
-cog predict \
+# Enable faster HF downloads and increase setup timeout for first-run model pull
+export HF_HUB_ENABLE_HF_TRANSFER=1
+cog predict --setup-timeout 10800 \
   -i prompt="A cinematic photo of a corgi in sunglasses" \
   -i ultra_fast=true \
   -i width=512 -i height=512
@@ -80,8 +81,9 @@ cog predict \
 
 Tips:
 - First predict downloads the Qwen-Image model (~57GB) inside the container. This may take a while on first run.
-- To reuse your host Hugging Face cache across Cog runs, prefer Linux with GPU; Cog predict does not support mounting volumes directly.
-- For local Apple Silicon speed, use the native CLI instead of Docker.
+- Speed up downloads by enabling HF transfer: `export HF_HUB_ENABLE_HF_TRANSFER=1` (already shown above).
+- For local Apple Silicon speed, prefer the native CLI with MPS; Cog is best for reproducible containers and Linux/NVIDIA GPUs.
+- If you need to pre-cache inside Docker, run the above once with a long timeout; subsequent runs will be faster.
 
 ## 🔧 Technical Notes
 

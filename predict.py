@@ -76,6 +76,11 @@ class Predictor(BasePredictor):
             self.pipe.enable_vae_tiling()
         except Exception:
             pass
+        # Try to reduce CPU memory pressure
+        try:
+            self.pipe.enable_sequential_cpu_offload()
+        except Exception:
+            pass
 
     def predict(
         self,
