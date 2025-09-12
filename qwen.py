@@ -12,6 +12,7 @@ from pathlib import Path
 import platform
 import warnings
 import subprocess
+import os
 from diffusers.utils import logging as diffusers_logging
 from transformers.utils import logging as transformers_logging
 
@@ -159,7 +160,9 @@ def cli():
 @click.option('--steps', default=20, help='Inference steps (10=stylistic, 20=quality, 30=max)')
 @click.option('--seed', type=int, help='Random seed')
 @click.option('--size', default='1024x1024', help='Image size (e.g. 1024x1024)')
-def generate(prompt, output, steps, seed, size):
+@click.option('-f', '--fast', is_flag=True, help='Lightning LoRA fast mode (8 steps, CFG ~1.0)')
+@click.option('-uf', '--ultra-fast', 'ultra_fast', is_flag=True, help='Lightning LoRA ultra-fast mode (4 steps, CFG ~1.0)')
+def generate(prompt, output, steps, seed, size, fast, ultra_fast):
     """Generate a new image from text.
     
     Examples:
@@ -175,7 +178,67 @@ def generate(prompt, output, steps, seed, size):
         raise click.ClickException(
             f"Invalid size format: {size} (use WxH like 1024x1024)"
         )
-    
+
+    # If fast modes requested, delegate to upstream submodule for best speed
+    if ultra_fast or fast:
+        try:
+            # Map WxH to aspect for upstream CLI
+            def _aspect_from_wh(w: int, h: int) -> str:
+                ratios = {
+                    (1, 1): '1:1',
+                    (16, 9): '16:9',
+                    (9, 16): '9:16',
+                    (4, 3): '4:3',
+                    (3, 4): '3:4',
+                    (3, 2): '3:2',
+                    (2, 3): '2:3',
+                }
+                # reduce fraction
+                from math import gcd
+                g = gcd(w, h)
+                key = (w // g, h // g)
+                return ratios.get(key, '16:9')
+
+            aspect = _aspect_from_wh(width, height)
+            submodule_root = Path(__file__).resolve().parent / 'external' / 'qwen-image-mps'
+            script = submodule_root / 'qwen-image-mps.py'
+            src_dir = submodule_root / 'src'
+            if not script.exists():
+                raise click.ClickException("Upstream submodule not found. Did submodule checkout succeed?")
+            outdir = Path.home() / 'qwen-images'
+            outdir.mkdir(exist_ok=True)
+
+            cmd = [
+                str(script), 'generate', '-p', prompt,
+                '--aspect', aspect,
+                '--outdir', str(outdir),
+            ]
+            if ultra_fast:
+                cmd.insert(2, '-uf')
+            elif fast:
+                cmd.insert(2, '-f')
+
+            env = os.environ.copy()
+            # Ensure submodule package is importable
+            env['PYTHONPATH'] = f"{src_dir}:{env.get('PYTHONPATH','')}"
+
+            print(f"⚡ Delegating to fast generator (aspect {aspect})...")
+            start = time.time()
+            res = subprocess.run(['python', *cmd], env=env, capture_output=True, text=True)
+            if res.returncode != 0:
+                # Show stderr to user for clarity
+                raise click.ClickException(res.stderr or res.stdout or 'Fast generator failed')
+            # Print upstream output succinctly
+            for line in res.stdout.splitlines():
+                if line.strip().startswith('Image saved to:'):
+                    print(line.strip())
+            print(f"✅ Done in {time.time()-start:.1f}s (fast mode)")
+            return
+        except click.ClickException:
+            raise
+        except Exception as e:
+            print(f"⚠️ Fast path failed ({e}), falling back to standard pipeline...")
+
     # Load pipeline
     pipeline, device = load_generation_pipeline()
     
