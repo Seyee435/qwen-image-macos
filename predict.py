@@ -116,7 +116,6 @@ class Predictor(BasePredictor):
             description="CFG scale. Defaults: 4.0 normal; 1.0 fast/ultra-fast",
             default=None,
         ),
-        ),
         width: Optional[int] = Input(
             description="Override width (pixels). If set with height, ignores aspect.",
             default=None,
