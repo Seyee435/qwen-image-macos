@@ -1,0 +1,3 @@
+[submodule "external/qwen-image-mps"]
+	path = external/qwen-image-mps
+	url = https://github.com/ivanfioravanti/qwen-image-mps
