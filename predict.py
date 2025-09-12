@@ -41,10 +41,12 @@ def maybe_load_lightning_lora(pipe, mode: Optional[str]) -> Optional[str]:
         return None
     try:
         pipe.load_lora_weights(repo_id, weight_name=fname)
-        try:
-            pipe.fuse_lora()
-        except Exception:
-            pass
+        # Avoid fusing on CPU to reduce memory spikes
+        if torch.cuda.is_available():
+            try:
+                pipe.fuse_lora()
+            except Exception:
+                pass
         return f"Lightning LoRA loaded ({mode})"
     except Exception:
         return None
@@ -59,9 +61,11 @@ class Predictor(BasePredictor):
         self.dtype = dtype
 
         # Large download on first run (57+ GB)
+        # Use low_cpu_mem_usage to reduce peak RAM during load on CPU
         self.pipe = QwenImagePipeline.from_pretrained(
             "Qwen/Qwen-Image",
-            dtype=dtype,
+            low_cpu_mem_usage=True,
+            use_safetensors=True,
         ).to(device)
 
         try:
