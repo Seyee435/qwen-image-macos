@@ -59,7 +59,7 @@ python qwen.py status  # Show system info
 On macOS, you can run this in a container with Replicate Cog. Note: Docker on macOS does not expose MPS, so it runs on CPU (slower). On Linux with NVIDIA, Cog will use CUDA automatically.
 
 Prereqs:
-- Docker Desktop
+- Docker Desktop (macOS users: increase memory to 64GB+ in Settings → Resources)
 - Cog CLI: brew install replicate/cog/cog
 
 Build the image (first time installs Python deps):
