@@ -54,6 +54,35 @@ python qwen.py status  # Show system info
 - Auto-opens generated image in Preview on macOS
 - Reproducible seeds and custom sizes
 
+## 🐳 Docker + Cog (optional)
+
+On macOS, you can run this in a container with Replicate Cog. Note: Docker on macOS does not expose MPS, so it runs on CPU (slower). On Linux with NVIDIA, Cog will use CUDA automatically.
+
+Prereqs:
+- Docker Desktop
+- Cog CLI: brew install replicate/cog/cog
+
+Build the image (first time installs Python deps):
+
+```bash
+cog build
+```
+
+Quick generate (CPU on macOS):
+
+```bash
+# 4-step ultra-fast mode with a small 512x512 test to keep it quick
+cog predict \
+  -i prompt="A cinematic photo of a corgi in sunglasses" \
+  -i ultra_fast=true \
+  -i width=512 -i height=512
+```
+
+Tips:
+- First predict downloads the Qwen-Image model (~57GB) inside the container. This may take a while on first run.
+- To reuse your host Hugging Face cache across Cog runs, prefer Linux with GPU; Cog predict does not support mounting volumes directly.
+- For local Apple Silicon speed, use the native CLI instead of Docker.
+
 ## 🔧 Technical Notes
 
 - Uses Alibaba's [Qwen-Image](https://huggingface.co/Qwen/Qwen-Image) via Diffusers

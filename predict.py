@@ -116,6 +116,15 @@ class Predictor(BasePredictor):
             description="CFG scale. Defaults: 4.0 normal; 1.0 fast/ultra-fast",
             default=None,
         ),
+        ),
+        width: Optional[int] = Input(
+            description="Override width (pixels). If set with height, ignores aspect.",
+            default=None,
+        ),
+        height: Optional[int] = Input(
+            description="Override height (pixels). If set with width, ignores aspect.",
+            default=None,
+        ),
     ) -> List[Path]:
         # LoRA mode
         lora_mode = "ultra" if ultra_fast else ("fast" if fast else None)
@@ -140,7 +149,10 @@ class Predictor(BasePredictor):
             except Exception:
                 pass
 
-        width, height = ASPECTS[aspect]
+        if width is not None and height is not None and width > 0 and height > 0:
+            w, h = int(width), int(height)
+        else:
+            w, h = ASPECTS[aspect]
         out_dir = SysPath("/tmp/outputs")
         out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -150,14 +162,14 @@ class Predictor(BasePredictor):
             gen_device = "cpu" if self.device == "mps" else self.device
             g = torch.Generator(device=gen_device).manual_seed(int(per_seed))
 
-            print(f"[{i+1}/{num_images}] steps={num_steps} cfg={cfg} seed={per_seed} {width}x{height}")
+            print(f"[{i+1}/{num_images}] steps={num_steps} cfg={cfg} seed={per_seed} {w}x{h}")
             result = self.pipe(
                 prompt=prompt,
                 negative_prompt=(negative_prompt or " "),
                 num_inference_steps=num_steps,
                 true_cfg_scale=cfg,
-                width=width,
-                height=height,
+                width=w,
+                height=h,
                 generator=g,
             )
             image = result.images[0]
