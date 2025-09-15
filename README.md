@@ -1,44 +1,58 @@
-# 🎨 Qwen Image for macOS (Generation Only)
+# 🎨 Qwen Image for macOS
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![macOS](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
 [![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-Optimized-green.svg)](https://support.apple.com/en-us/HT211814)
 
-Native, fast, Apple Silicon–accelerated text-to-image generation with Qwen Image. Lightning LoRA acceleration for quick 4–8 step generations. No Docker, no cloud, no complexity.
+**Fast AI image generation for Apple Silicon.** Native CLI with MPS acceleration **or** containerized with Cog. Lightning LoRA for 4–8 step generation.
 
-## 🚀 Installation
+## 🚀 Quick Start
 
-Clone, install, and run:
+**Choose your approach:**
+
+### Option A: Native CLI (⚡ **2 minutes** - Recommended for Apple Silicon)
 
 ```bash
 git clone https://github.com/zsxkib/qwen-image-macos.git
 cd qwen-image-macos
 pip install -r requirements.txt
-python qwen.py test
+python qwen.py generate "cyberpunk cityscape" --ultra-fast
 ```
 
-First run downloads ~20GB of model weights (cached locally). After that, startup is quick.
-
-## ⚡ Performance
-
-Tested on an M3 Max (128GB):
-- 10 steps: quick stylistic results
-- 20+ steps: fully formed, high quality images
-- Uses Apple Silicon MPS automatically
-
-## 🎯 Usage
+### Option B: Containerized with Cog (🐳 **Reproducible** - Works everywhere)
 
 ```bash
-# Generate from a prompt
-python qwen.py generate "cyberpunk cityscape at night" --steps 20
+git clone https://github.com/zsxkib/qwen-image-macos.git
+cd qwen-image-macos
+python3 precache.py  # downloads model once (~10 min)
+cog predict -i prompt="cyberpunk cityscape" --output city.png
+```
 
-# Custom sizes and settings
-python qwen.py generate "mountain landscape" --size 1024x768 --steps 20 --seed 42
+> **Note**: Cog runs ~30x slower on Apple Silicon (60+ min) due to x86_64 emulation. Use native CLI for speed, cog for reproducibility/deployment.
 
-# Quick commands
-python qwen.py test    # Verify setup
-python qwen.py status  # Show system info
+## ⚡ Performance Comparison
+
+| Method | Time | Platform | GPU | Best For |
+|--------|------|----------|-----|----------|
+| **Native CLI** | **2 min** | Apple Silicon | ✅ MPS | Speed, development |
+| **Cog (macOS)** | 60+ min | x86_64 emulation | ❌ CPU only | Reproducibility |
+| **Cog (Linux)** | ~2-5 min | Native x86_64 | ✅ CUDA | Deployment, cloud |
+
+## 🎯 Native CLI Usage
+
+```bash
+# Ultra-fast (4 steps with Lightning LoRA)
+python qwen.py generate "cyberpunk cityscape" --ultra-fast
+
+# Fast mode (8 steps)
+python qwen.py generate "mountain landscape" --fast
+
+# Custom settings
+python qwen.py generate "robot on mars" --steps 20 --seed 42
+
+# Test your setup
+python qwen.py test
 ```
 
 ## 🧰 Requirements
@@ -54,51 +68,54 @@ python qwen.py status  # Show system info
 - Auto-opens generated image in Preview on macOS
 - Reproducible seeds and custom sizes
 
-## 🐳 Docker + Cog (optional)
+## 🐳 Cog Usage (Containerized)
 
-On macOS, you can run this in a container with Replicate Cog. Note: Docker on macOS does not expose MPS, so it runs on CPU (slower). On Linux with NVIDIA, Cog will use CUDA automatically.
+**Prerequisites:**
+- Docker Desktop (macOS: increase memory to 64GB+ in Settings → Resources)
+- Cog CLI: `brew install replicate/cog/cog`
 
-Prereqs:
-- Docker Desktop (macOS users: increase memory to 64GB+ in Settings → Resources)
-- Cog CLI: brew install replicate/cog/cog
-
-Build the image (first time installs Python deps):
+**Quick workflow:**
 
 ```bash
-cog build
+# 1. Pre-download model (recommended, ~10 min)
+python3 precache.py
+
+# 2. Generate images
+cog predict -i prompt="robot on mars" --output robot.png
+cog predict -i prompt="cyberpunk city" -i steps=10 --output city.png
 ```
 
-Quick generate (CPU on macOS):
+**When to use cog:**
+- ✅ **Linux/NVIDIA**: Fast with CUDA acceleration
+- ✅ **Reproducible deployments**: Exact same environment everywhere
+- ✅ **Replicate cloud**: Deploy to replicate.com
+- ❌ **Apple Silicon**: Use native CLI instead (30x faster)
 
-```bash
-# Enable faster HF downloads and increase setup timeout for first-run model pull
-export HF_HUB_ENABLE_HF_TRANSFER=1
-cog predict --setup-timeout 10800 \
-  -i prompt="A cinematic photo of a corgi in sunglasses" \
-  -i ultra_fast=true \
-  -i width=512 -i height=512
-```
+## 🔧 Technical Details
 
-Tips:
-- First predict downloads the Qwen-Image model (~57GB) inside the container. This may take a while on first run.
-- Speed up downloads by enabling HF transfer: `export HF_HUB_ENABLE_HF_TRANSFER=1` (already shown above).
-- For local Apple Silicon speed, prefer the native CLI with MPS; Cog is best for reproducible containers and Linux/NVIDIA GPUs.
-- If you need to pre-cache inside Docker, run the above once with a long timeout; subsequent runs will be faster.
-
-## 🔧 Technical Notes
-
-- Uses Alibaba's [Qwen-Image](https://huggingface.co/Qwen/Qwen-Image) via Diffusers
-- Attention slicing and VAE tiling enabled to reduce memory spikes on MPS
+- **Model**: [Qwen-Image](https://huggingface.co/Qwen/Qwen-Image) (57GB)
+- **Acceleration**: Lightning LoRA for 4-8 step generation
+- **Memory**: Attention slicing + VAE tiling for efficiency
+- **Cache**: Models stored in `model_cache/` (~63GB)
 
 ## 🛠️ Troubleshooting
 
+**Check Apple Silicon GPU:**
 ```bash
 python -c "import torch; print('MPS available:', torch.backends.mps.is_available())"
 ```
-Should print `True`. If not, update macOS / Xcode Command Line Tools and PyTorch.
 
-If images look unfinished, increase `--steps` to 20 or 30.
+**Common fixes:**
+- MPS not available → Update macOS/PyTorch
+- Images look unfinished → Increase `--steps` to 20-30
+- Cog OOM errors → Increase Docker memory to 64GB+
+
+## 🎆 Example Output
+
+Native CLI generates high-quality images in ~2 minutes:
+
+![Example](example.webp)
 
 ---
 
-Built for a clean, native Mac experience. Pure Apple Silicon power.
+**Built for Apple Silicon. Optimized for speed. Ready for deployment.**
